@@ -1,0 +1,183 @@
+<app-navbar></app-navbar>
+
+<div class="container container-page py-5">
+  <span class="eyebrow d-block">Historial</span>
+  <h1 class="font-display mb-4">Mis pedidos</h1>
+
+  @if (justCreatedId()) {
+    <div class="alert alert-brand-success d-flex align-items-center gap-2 mb-4" role="status">
+      <i class="bi bi-check-circle-fill fs-5"></i>
+      <span>¡Pedido confirmado! Ya puedes ver su estado abajo — #{{ justCreatedId()!.slice(-6) }}</span>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="d-flex flex-column align-items-center justify-content-center gap-3 py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="text-muted mb-0">Cargando pedidos...</p>
+    </div>
+  } @else if (orders().length === 0) {
+    <div class="card bg-dark border-secondary p-5 text-center">
+      <i class="bi bi-bag fs-1 text-secondary mb-3"></i>
+      <p class="text-muted mb-3">Aun no tienes pedidos.</p>
+      <a routerLink="/catalogo" class="btn btn-gradient align-self-center px-4">Ir al catalogo</a>
+    </div>
+  } @else {
+    <div class="d-flex flex-column gap-4">
+      @for (order of orders(); track order._id) {
+        <div class="order-card" [class.border-success]="order._id === justCreatedId()">
+          <!-- Barra de encabezado tipo Amazon -->
+          <div class="order-header-bar">
+            <div class="order-header-seg">
+              <span class="order-header-label">Pedido realizado</span>
+              <span class="order-header-value">{{ order.createdAt | date:'d MMM y' }}</span>
+            </div>
+            <div class="order-header-seg">
+              <span class="order-header-label">Total</span>
+              <span class="order-header-value font-mono">{{ order.total | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <div class="order-header-seg">
+              <span class="order-header-label">Enviar a</span>
+              <button type="button" class="order-header-value order-header-link" (click)="toggleExpand(order._id)" [attr.aria-expanded]="isExpanded(order._id)">
+                {{ order.shippingAddress?.city || 'No especificada' }} <i class="bi bi-chevron-down small"></i>
+              </button>
+            </div>
+            <div class="order-header-seg ms-lg-auto text-lg-end">
+              <span class="order-header-label">Pedido # {{ order._id.slice(-8) }}</span>
+              <button type="button" class="order-header-link" (click)="toggleExpand(order._id)" [attr.aria-expanded]="isExpanded(order._id)">
+                {{ isExpanded(order._id) ? 'Ocultar detalles' : 'Ver detalles del pedido' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Cuerpo -->
+          <div class="order-body">
+            @if (order.resolution) {
+              <div class="resolution-banner resolution-banner--{{ order.resolution }} mb-3">
+                <i class="bi {{ resolutionInfo(order.resolution).icon }} fs-5"></i>
+                <div>
+                  <div class="fw-semibold">{{ resolutionInfo(order.resolution).text }}</div>
+                  @if (order.resolutionNote) {
+                    <div class="small text-secondary">{{ order.resolutionNote }}</div>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (order.status === 'cancelado') {
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-x-circle-fill text-danger fs-5"></i>
+                <span class="fw-semibold text-danger">
+                  Cancelado{{ order.cancelledAt ? ' el ' + (order.cancelledAt | date:'d MMM y') : '' }}
+                </span>
+              </div>
+            } @else {
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi {{ statusInfo(order.status).icon }} {{ statusInfo(order.status).class }} fs-5"></i>
+                <span class="fw-semibold {{ statusInfo(order.status).class }}">{{ statusInfo(order.status).text }}</span>
+              </div>
+            }
+
+            @for (item of order.items; track item.product; let last = $last) {
+              <div class="order-item-row" [class.border-bottom]="!last">
+                <div class="img-placeholder rounded flex-shrink-0" style="width:64px;height:64px;overflow:hidden;">
+                  @if ($any(item.product).images?.length) {
+                    <img [src]="$any(item.product).images[0]" class="w-100 h-100 object-fit-cover" [alt]="$any(item.product).name || 'Producto'" />
+                  } @else {
+                    <i class="bi bi-image"></i>
+                  }
+                </div>
+                <div class="flex-grow-1">
+                  <div class="fw-semibold">{{ $any(item.product).name || 'Producto' }}</div>
+                  <div class="text-muted small">Cantidad: {{ item.quantity }}</div>
+                </div>
+                <span class="font-mono text-secondary">{{ item.subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              @if (order.status !== 'cancelado') {
+                <a [routerLink]="['/pedidos', order._id, 'rastreo']" class="btn btn-gradient btn-sm">
+                  <i class="bi bi-geo-alt"></i> Rastrear envio
+                </a>
+              }
+              <button type="button" class="btn btn-outline-primary btn-sm" [disabled]="reorderingId() === order._id" (click)="reorder(order)">
+                <i class="bi bi-arrow-repeat"></i> {{ reorderingId() === order._id ? 'Agregando...' : 'Comprar de nuevo' }}
+              </button>
+              <button type="button" class="btn btn-outline-primary btn-sm" (click)="toggleExpand(order._id)">
+                <i class="bi bi-receipt"></i> {{ isExpanded(order._id) ? 'Ocultar factura' : 'Ver factura' }}
+              </button>
+            </div>
+
+            @if (isExpanded(order._id)) {
+              <div class="order-details mt-3 pt-3 border-top border-secondary">
+                <div class="row g-3">
+                  <div class="col-sm-6">
+                    <div class="order-header-label mb-1">Direccion de envio</div>
+                    @if (order.shippingAddress) {
+                      <div class="small text-secondary">
+                        {{ order.shippingAddress.address }}<br>
+                        {{ order.shippingAddress.city }}, {{ order.shippingAddress.department }}<br>
+                        <i class="bi bi-telephone"></i> {{ order.shippingAddress.phone }}
+                        @if (order.shippingAddress.notes) {
+                          <br><span class="fst-italic">"{{ order.shippingAddress.notes }}"</span>
+                        }
+                      </div>
+                    } @else {
+                      <div class="small text-muted fst-italic">Este pedido no tiene direccion registrada (se creo antes de habilitar envios).</div>
+                    }
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="order-header-label mb-1">Resumen de pago</div>
+                    <div class="d-flex justify-content-between small">
+                      <span class="text-secondary">Subtotal</span>
+                      <span class="font-mono">{{ (order.subtotal ?? order.total) | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between small mb-1">
+                      <span class="text-secondary">Envio</span>
+                      @if (!order.shippingCost) {
+                        <span class="font-mono text-success">Gratis</span>
+                      } @else {
+                        <span class="font-mono">{{ order.shippingCost | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                      }
+                    </div>
+                    <div class="d-flex justify-content-between fw-semibold">
+                      <span>Total</span>
+                      <span class="font-mono">{{ order.total | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+      <span class="text-muted small">Pagina {{ page() }} de {{ totalPages() }}</span>
+      <div class="d-flex gap-2">
+        <button
+          type="button"
+          class="btn btn-outline-light btn-sm"
+          [disabled]="page() <= 1"
+          (click)="prevPage()"
+        >
+          <i class="bi bi-chevron-left"></i> Anterior
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline-light btn-sm"
+          [disabled]="page() >= totalPages()"
+          (click)="nextPage()"
+        >
+          Siguiente <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+<app-footer></app-footer>

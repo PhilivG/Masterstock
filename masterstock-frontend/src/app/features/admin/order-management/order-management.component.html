@@ -1,0 +1,237 @@
+<app-navbar></app-navbar>
+
+<div class="container container-page py-5">
+  <span class="eyebrow d-block">Admin</span>
+  <h1 class="font-display mb-4">Gestion de pedidos</h1>
+
+  @if (errorMsg()) {
+    <div class="alert alert-brand-danger d-flex align-items-center gap-2 mb-3" role="alert">
+      <i class="bi bi-exclamation-circle"></i>
+      <span class="small">{{ errorMsg() }}</span>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="d-flex flex-column align-items-center justify-content-center gap-3 py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="text-muted mb-0">Cargando pedidos...</p>
+    </div>
+  } @else if (orders().length === 0) {
+    <p class="text-muted">No hay pedidos todavia.</p>
+  } @else {
+    <div class="d-flex flex-column gap-4">
+      @for (order of orders(); track order._id) {
+        <div class="order-card">
+          <!-- Barra de encabezado tipo Amazon -->
+          <div class="order-header-bar">
+            <div class="order-header-seg">
+              <span class="order-header-label">Pedido realizado</span>
+              <span class="order-header-value">{{ order.createdAt | date:'d MMM y, h:mm a' }}</span>
+            </div>
+            <div class="order-header-seg">
+              <span class="order-header-label">Total</span>
+              <span class="order-header-value font-mono">{{ order.total | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            @if (order.shippingAddress) {
+              <div class="order-header-seg">
+                <span class="order-header-label">Enviar a</span>
+                <span class="order-header-value">{{ order.shippingAddress.city }}, {{ order.shippingAddress.department }}</span>
+              </div>
+            }
+            <div class="order-header-seg ms-lg-auto text-lg-end">
+              <span class="order-header-label">Pedido # {{ order._id.slice(-8) }}</span>
+            </div>
+          </div>
+
+          <!-- Cuerpo -->
+          <div class="order-body">
+            @if (order.resolution) {
+              <div class="resolution-banner resolution-banner--{{ order.resolution }} mb-3">
+                <i class="bi {{ resolutionInfo(order.resolution).icon }} fs-5"></i>
+                <div>
+                  <div class="fw-semibold">{{ resolutionInfo(order.resolution).text }}</div>
+                  @if (order.resolutionNote) {
+                    <div class="small text-secondary">{{ order.resolutionNote }}</div>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (order.status === 'cancelado') {
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-x-circle-fill text-danger fs-5"></i>
+                <span class="fw-semibold text-danger">
+                  Cancelado{{ order.cancelledAt ? ' el ' + (order.cancelledAt | date:'d MMM y') : '' }}
+                </span>
+              </div>
+            } @else if (!isTracking(order._id)) {
+              <!-- Estado compacto por defecto; el tracker se muestra al darle "Rastrear" -->
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi {{ statusInfo(order.status).icon }} {{ statusInfo(order.status).class }} fs-5"></i>
+                <span class="fw-semibold {{ statusInfo(order.status).class }}">{{ statusInfo(order.status).text }}</span>
+              </div>
+            } @else {
+              <!-- Tracker de envio estilo Amazon -->
+              <div class="ship-tracker mb-3">
+                <div class="ship-tracker-headline">{{ currentStepLabel(order) }}</div>
+                <div class="ship-tracker-row">
+                  @for (step of trackerSteps(order); track step.key; let last = $last) {
+                    <span class="ship-tracker-dot" [class.ship-tracker-dot--done]="step.done"></span>
+                    @if (!last) {
+                      <span class="ship-tracker-line" [class.ship-tracker-line--done]="step.lineDone"></span>
+                    }
+                  }
+                </div>
+                <div class="ship-tracker-labels">
+                  @for (step of trackerSteps(order); track step.key) {
+                    <div class="ship-tracker-col">
+                      <span class="ship-tracker-label" [class.ship-tracker-label--done]="step.done">{{ step.label }}</span>
+                      @if (step.date) {
+                        <span class="ship-tracker-date">{{ step.date | date:'d MMM' }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @for (item of order.items; track item.product; let last = $last) {
+              <div class="order-item-row" [class.border-bottom]="!last">
+                <div class="img-placeholder rounded flex-shrink-0" style="width:64px;height:64px;overflow:hidden;">
+                  @if ($any(item.product).images?.length) {
+                    <img [src]="$any(item.product).images[0]" class="w-100 h-100 object-fit-cover" [alt]="$any(item.product).name || 'Producto'" />
+                  } @else {
+                    <i class="bi bi-image"></i>
+                  }
+                </div>
+                <div class="flex-grow-1">
+                  <div class="fw-semibold">{{ $any(item.product).name || 'Producto' }}</div>
+                  <div class="text-muted small">Cantidad: {{ item.quantity }}</div>
+                </div>
+                <span class="font-mono text-secondary">{{ item.subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
+
+            @if (order.shippingAddress) {
+              <div class="mt-3 pt-3 border-top border-secondary row g-3">
+                <div class="col-sm-6">
+                  <div class="order-header-label mb-1">Direccion de envio</div>
+                  <div class="small text-secondary">
+                    {{ order.shippingAddress.address }}<br>
+                    {{ order.shippingAddress.city }}, {{ order.shippingAddress.department }}<br>
+                    <i class="bi bi-telephone"></i> {{ order.shippingAddress.phone }}
+                    @if (order.shippingAddress.notes) {
+                      <br><span class="fst-italic">"{{ order.shippingAddress.notes }}"</span>
+                    }
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="order-header-label mb-1">Resumen de pago</div>
+                  <div class="d-flex justify-content-between small">
+                    <span class="text-secondary">Subtotal</span>
+                    <span class="font-mono">{{ (order.subtotal ?? order.total) | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between small">
+                    <span class="text-secondary">Envio</span>
+                    @if (!order.shippingCost) {
+                      <span class="font-mono text-success">Gratis</span>
+                    } @else {
+                      <span class="font-mono">{{ order.shippingCost | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <p class="text-muted small fst-italic mt-3 mb-0">Este pedido no tiene direccion registrada (se creo antes de habilitar envios).</p>
+            }
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              @if (order.status !== 'cancelado') {
+                <button type="button" class="btn btn-outline-primary btn-sm" (click)="toggleTracking(order._id)">
+                  <i class="bi bi-geo-alt"></i> {{ isTracking(order._id) ? 'Ocultar rastreo' : 'Rastrear envio' }}
+                </button>
+              }
+              @if (order.status === 'confirmado') {
+                <button class="btn btn-gradient btn-sm" [disabled]="updatingId() === order._id" (click)="updateStatus(order, 'enviado')">
+                  <i class="bi bi-box-seam"></i> Marcar como enviado
+                </button>
+                <button class="btn btn-outline-danger btn-sm" [disabled]="updatingId() === order._id" (click)="updateStatus(order, 'cancelado')">
+                  <i class="bi bi-x"></i> Cancelar pedido
+                </button>
+              } @else if (order.status === 'enviado') {
+                <button class="btn btn-gradient btn-sm" [disabled]="updatingId() === order._id" (click)="updateStatus(order, 'entregado')">
+                  <i class="bi bi-house-check"></i> Marcar como entregado
+                </button>
+                <button class="btn btn-outline-danger btn-sm" [disabled]="updatingId() === order._id" (click)="updateStatus(order, 'cancelado')">
+                  <i class="bi bi-x"></i> Cancelar pedido
+                </button>
+              }
+
+              @if (order.status !== 'cancelado' && !order.resolution && reportingOrderId() !== order._id) {
+                <button class="btn btn-outline-light btn-sm" (click)="openReportForm(order)">
+                  <i class="bi bi-exclamation-triangle"></i> Reportar incidente
+                </button>
+              }
+            </div>
+
+            @if (reportingOrderId() === order._id) {
+              <div class="incident-form mt-3 pt-3 border-top border-secondary">
+                <div class="order-header-label mb-2">¿Qué le vamos a ofrecer al cliente?</div>
+                <div class="d-flex gap-2 mb-3">
+                  <button type="button" class="btn btn-sm" [class.btn-outline-warning]="resolutionChoice() !== 'reembolso'" [class.btn-warning]="resolutionChoice() === 'reembolso'"
+                          (click)="resolutionChoice.set('reembolso')">
+                    <i class="bi bi-cash-coin"></i> Reembolso
+                  </button>
+                  <button type="button" class="btn btn-sm" [class.btn-outline-primary]="resolutionChoice() !== 'reemplazo'" [class.btn-primary]="resolutionChoice() === 'reemplazo'"
+                          (click)="resolutionChoice.set('reemplazo')">
+                    <i class="bi bi-arrow-repeat"></i> Reemplazo
+                  </button>
+                </div>
+
+                <label class="form-label small text-secondary" for="resolution-note-{{ order._id }}">Motivo (el cliente lo vera)</label>
+                <textarea id="resolution-note-{{ order._id }}" class="form-control text-light border-secondary mb-3" rows="2"
+                          placeholder="Ej. el producto llego con el empaque danado..."
+                          [ngModel]="resolutionNote()" (ngModelChange)="resolutionNote.set($event)"></textarea>
+
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-gradient btn-sm"
+                          [disabled]="!resolutionChoice() || !resolutionNote().trim() || submittingResolution()"
+                          (click)="submitResolution(order)">
+                    {{ submittingResolution() ? 'Enviando...' : 'Confirmar' }}
+                  </button>
+                  <button type="button" class="btn btn-outline-light btn-sm" (click)="closeReportForm()">Cancelar</button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+      <span class="text-muted small">Pagina {{ page() }} de {{ totalPages() }}</span>
+      <div class="d-flex gap-2">
+        <button
+          type="button"
+          class="btn btn-outline-light btn-sm"
+          [disabled]="page() <= 1"
+          (click)="prevPage()"
+        >
+          <i class="bi bi-chevron-left"></i> Anterior
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline-light btn-sm"
+          [disabled]="page() >= totalPages()"
+          (click)="nextPage()"
+        >
+          Siguiente <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+<app-footer></app-footer>

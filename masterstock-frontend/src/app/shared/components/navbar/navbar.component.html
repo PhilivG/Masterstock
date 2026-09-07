@@ -1,0 +1,131 @@
+<header class="site-header">
+  <!-- Fila superior: marca, buscador grande, cuenta y carrito -->
+  <div class="navbar-top">
+    <div class="container d-flex align-items-center gap-3 py-2">
+      <a routerLink="/" class="navbar-brand fw-bold font-display text-gradient flex-shrink-0">MasterStock</a>
+
+      <form class="flex-grow-1 d-none d-md-block" (ngSubmit)="onSearch(searchDesktop.value)">
+        <div class="input-group input-group-lg search-bar-lg">
+          <input
+            #searchDesktop
+            type="text"
+            class="form-control"
+            placeholder="Buscar componentes, marcas, SKU..."
+            aria-label="Buscar productos"
+          />
+          <button type="submit" class="btn btn-gradient" aria-label="Buscar">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+      </form>
+
+      <div class="d-flex align-items-center gap-2 gap-md-3 flex-shrink-0 ms-auto ms-md-0">
+        @if (auth.isLoggedIn()) {
+          <div class="dropdown d-none d-sm-block">
+            <button
+              type="button"
+              class="navbar-account"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <span class="navbar-account-greeting">Hola, {{ auth.currentUser()?.firstName }}</span>
+              <span class="navbar-account-label">Mi cuenta <i class="bi bi-chevron-down"></i></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" routerLink="/perfil">Mi perfil</a></li>
+              @if (!auth.isAdmin()) {
+                <li><a class="dropdown-item" routerLink="/pedidos">Mis pedidos</a></li>
+              }
+              <li><hr class="dropdown-divider" /></li>
+              <li><button type="button" class="dropdown-item" (click)="auth.logout()">Salir</button></li>
+            </ul>
+          </div>
+        } @else {
+          <a routerLink="/login" class="navbar-account d-none d-sm-flex">
+            <span class="navbar-account-greeting">Hola, inicia sesion</span>
+            <span class="navbar-account-label">Cuenta y pedidos</span>
+          </a>
+        }
+
+        <a
+          routerLink="/carrito"
+          routerLinkActive="active"
+          class="navbar-cart position-relative"
+          title="Carrito"
+          [attr.aria-label]="'Carrito, ' + cart.count() + ' productos'"
+        >
+          <i class="bi bi-cart3"></i>
+          <span class="navbar-cart-label d-none d-lg-inline">Carrito</span>
+          @if (cart.count() > 0) {
+            <span class="cart-badge">{{ cart.count() }}</span>
+          }
+        </a>
+
+        <button
+          class="navbar-toggler d-md-none"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navSecondary"
+          aria-controls="navSecondary"
+          aria-expanded="false"
+          aria-label="Abrir menu de navegacion"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Buscador: fila propia debajo del logo, solo en mobile/tablet -->
+    <div class="container pb-2 d-md-none">
+      <form (ngSubmit)="onSearch(searchMobile.value)">
+        <div class="input-group input-group-sm">
+          <input #searchMobile type="text" class="form-control" placeholder="Buscar productos..." aria-label="Buscar productos" />
+          <button type="submit" class="btn btn-gradient" aria-label="Buscar">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Fila secundaria: navegacion tipo categorias -->
+  <nav class="navbar-secondary navbar-expand-md">
+    <div class="container">
+      <div class="collapse navbar-collapse" id="navSecondary">
+        <ul class="navbar-nav flex-row flex-wrap gap-1 py-1">
+          <li class="nav-item">
+            <a routerLink="/catalogo" routerLinkActive="active" class="nav-link">Catalogo</a>
+          </li>
+
+          @if (auth.isLoggedIn() && !auth.isAdmin()) {
+            <li class="nav-item">
+              <a routerLink="/pedidos" routerLinkActive="active" class="nav-link">Mis pedidos</a>
+            </li>
+          }
+
+          @if (auth.isAdmin()) {
+            <li class="nav-item">
+              <a routerLink="/admin/productos" routerLinkActive="active" class="nav-link">Panel</a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/admin/pedidos" routerLinkActive="active" class="nav-link">Pedidos</a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/admin/inventario" routerLinkActive="active" class="nav-link">Inventario</a>
+            </li>
+          }
+
+          <li class="nav-item">
+            <a routerLink="/sobre-nosotros" routerLinkActive="active" class="nav-link">Nosotros</a>
+          </li>
+
+          @if (auth.isLoggedIn()) {
+            <li class="nav-item d-md-none">
+              <button (click)="auth.logout()" class="nav-link btn btn-link p-0 border-0">Salir</button>
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>

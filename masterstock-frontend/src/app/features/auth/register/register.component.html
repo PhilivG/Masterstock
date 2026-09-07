@@ -1,0 +1,108 @@
+<div class="login-split">
+  <div class="login-brand-panel d-none d-lg-flex flex-column justify-content-between">
+    <a routerLink="/" class="font-display fs-3 text-white text-decoration-none">MasterStock</a>
+
+    <div>
+      <span class="eyebrow d-block mb-2" style="color:rgba(255,255,255,.75);">Unete a MasterStock</span>
+      <h1 class="font-display display-5 text-white mb-3">Arma tu setup a tu ritmo</h1>
+      <p class="mb-4" style="color:rgba(255,255,255,.85); max-width:420px;">
+        Crea tu cuenta gratis y empieza a armar pedidos con seguimiento claro, sin pagos en linea.
+      </p>
+
+      <div class="d-flex flex-column gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="login-feature-icon"><i class="bi bi-cart-check"></i></div>
+          <span class="text-white">Guarda tu carrito entre sesiones</span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <div class="login-feature-icon"><i class="bi bi-clock-history"></i></div>
+          <span class="text-white">Historial completo de tus pedidos</span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <div class="login-feature-icon"><i class="bi bi-person-check"></i></div>
+          <span class="text-white">Perfil con tus datos de envio guardados</span>
+        </div>
+      </div>
+    </div>
+
+    <span class="small" style="color:rgba(255,255,255,.6);">© 2026 MasterStock</span>
+  </div>
+
+  <div class="login-form-panel d-flex align-items-center justify-content-center">
+    <div class="w-100 max-w-auth">
+      <div class="text-center mb-4 d-lg-none">
+        <a routerLink="/" class="font-display fs-3 text-gradient text-decoration-none">MasterStock</a>
+      </div>
+
+      <h1 class="h3 mb-1">Crear cuenta</h1>
+      <p class="text-secondary small mb-4">Registrate para armar pedidos y hacerles seguimiento.</p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label" for="register-firstName">Nombre</label>
+            <input id="register-firstName" type="text" formControlName="firstName" class="form-control text-light border-secondary" [class.is-invalid]="fieldError(form.get('firstName'))" />
+            @if (fieldError(form.get('firstName')); as msg) {
+              <div class="invalid-feedback d-block">{{ msg }}</div>
+            }
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label" for="register-lastName">Apellido</label>
+            <input id="register-lastName" type="text" formControlName="lastName" class="form-control text-light border-secondary" [class.is-invalid]="fieldError(form.get('lastName'))" />
+            @if (fieldError(form.get('lastName')); as msg) {
+              <div class="invalid-feedback d-block">{{ msg }}</div>
+            }
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="register-email">Email</label>
+          <div class="input-group">
+            <span class="input-group-text border-secondary text-secondary"><i class="bi bi-envelope"></i></span>
+            <input id="register-email" type="email" formControlName="email" class="form-control text-light border-secondary" placeholder="tu@email.com" [class.is-invalid]="fieldError(form.get('email'))" />
+          </div>
+          @if (fieldError(form.get('email')); as msg) {
+            <div class="invalid-feedback d-block">{{ msg }}</div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="register-phone">Telefono (opcional)</label>
+          <div class="input-group">
+            <span class="input-group-text border-secondary text-secondary"><i class="bi bi-telephone"></i></span>
+            <input id="register-phone" type="tel" formControlName="phone" class="form-control text-light border-secondary" />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="register-password">Contrasena</label>
+          <div class="input-group">
+            <span class="input-group-text border-secondary text-secondary"><i class="bi bi-lock"></i></span>
+            <input id="register-password" [type]="showPassword() ? 'text' : 'password'" formControlName="password" class="form-control text-light border-secondary" placeholder="Minimo 6 caracteres" [class.is-invalid]="fieldError(form.get('password'))" />
+            <button type="button" class="btn btn-outline-light" (click)="togglePassword()" tabindex="-1" [attr.aria-label]="showPassword() ? 'Ocultar contrasena' : 'Mostrar contrasena'">
+              <i class="bi" [class.bi-eye]="!showPassword()" [class.bi-eye-slash]="showPassword()"></i>
+            </button>
+          </div>
+          @if (fieldError(form.get('password')); as msg) {
+            <div class="invalid-feedback d-block">{{ msg }}</div>
+          }
+        </div>
+
+        @if (errorMsg()) {
+          <div class="alert alert-brand-danger d-flex align-items-center gap-2 py-2 px-3 mb-3" role="alert">
+            <i class="bi bi-exclamation-circle"></i>
+            <span class="small">{{ errorMsg() }}</span>
+          </div>
+        }
+
+        <button type="submit" class="btn btn-gradient w-100" [disabled]="form.invalid || loading()">
+          {{ loading() ? 'Creando cuenta...' : 'Crear cuenta' }}
+        </button>
+      </form>
+
+      <p class="text-secondary text-center small mt-4 mb-0">
+        Ya tienes cuenta? <a routerLink="/login" class="text-gradient fw-semibold">Inicia sesion</a>
+      </p>
+    </div>
+  </div>
+</div>

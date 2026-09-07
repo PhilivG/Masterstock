@@ -1,0 +1,29 @@
+# Dependencias
+node_modules/
+**/node_modules/
+
+# Builds
+dist/
+**/dist/
+.angular/
+
+# Variables de entorno (secretos, nunca se suben)
+.env
+**/.env
+
+# Material fuente de imagenes (referencia, no lo usa la app en runtime)
+masterstock-frontend/imgs-fuente/
+
+# Logs
+npm-debug.log*
+pnpm-debug.log*
+
+# Sistema / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/

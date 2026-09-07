@@ -1,0 +1,18 @@
+services:
+  backend:
+    build: ./masterstock-backend
+    container_name: masterstock-backend
+    restart: unless-stopped
+    env_file:
+      - ./masterstock-backend/.env
+    expose:
+      - "3000" # solo accesible dentro de la red de docker, nginx lo expone hacia afuera
+
+  frontend:
+    build: ./masterstock-frontend
+    container_name: masterstock-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80" # unico puerto expuesto al exterior: nginx sirve el sitio y hace de proxy hacia /api
+    depends_on:
+      - backend

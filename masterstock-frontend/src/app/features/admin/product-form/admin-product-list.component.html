@@ -1,0 +1,54 @@
+<app-navbar></app-navbar>
+
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="font-display">Panel de productos</h1>
+      <p class="text-secondary">Gestiona el catalogo y el stock.</p>
+    </div>
+    <a routerLink="/admin/productos/nuevo" class="btn btn-primary">+ Nuevo producto</a>
+  </div>
+
+  @if (loading()) {
+    <div class="d-flex flex-column align-items-center justify-content-center gap-3 py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="text-muted mb-0">Cargando...</p>
+    </div>
+  } @else {
+    <div class="row g-3">
+      @for (product of products(); track product._id) {
+        <div class="col-md-3">
+          <app-product-card [product]="product" [adminMode]="true"></app-product-card>
+          <div class="d-flex gap-2 mt-2">
+            <a [routerLink]="['/admin/productos', product._id]" class="btn btn-outline-primary btn-sm flex-fill">Editar</a>
+            <button (click)="askDelete(product)" class="btn btn-outline-danger btn-sm flex-fill">Eliminar</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (pendingDelete(); as product) {
+  <div class="modal-backdrop-custom" (click)="cancelDelete()">
+    <div class="card bg-dark border-secondary corner-notch-sm p-4 max-w-auth" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="'Confirmar eliminacion de ' + product.name">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-exclamation-triangle text-warning fs-4"></i>
+        <h2 class="h5 mb-0">Eliminar producto</h2>
+      </div>
+      <p class="text-secondary">
+        ¿Seguro que quieres eliminar <span class="fw-semibold text-light">{{ product.name }}</span>? Esta accion no se puede deshacer.
+      </p>
+      <div class="d-flex gap-2 justify-content-end mt-3">
+        <button type="button" class="btn btn-outline-light btn-sm" (click)="cancelDelete()">Cancelar</button>
+        <button type="button" class="btn btn-outline-danger btn-sm" (click)="confirmDelete()">
+          <i class="bi bi-trash"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<app-footer></app-footer>

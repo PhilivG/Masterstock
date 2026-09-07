@@ -1,0 +1,209 @@
+### Variables
+@baseUrl = http://localhost:3000/api
+@tokenComprador = pega_aqui_el_token_del_login_comprador
+@tokenAdmin = pega_aqui_el_token_del_login_admin
+@productId = pega_aqui_el_id_de_un_producto
+@orderId = pega_aqui_el_id_de_un_pedido
+
+### Health check — confirma que el servidor está corriendo
+GET {{baseUrl}}/health
+
+###############################################
+# AUTH
+###############################################
+
+### Registrar un comprador
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Camila",
+  "lastName": "Ruiz",
+  "email": "camila@test.com",
+  "password": "123456",
+  "phone": "3001234567"
+}
+
+### Login como comprador (copia el token de la respuesta a @tokenComprador)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "camila@test.com",
+  "password": "123456"
+}
+
+### Login como admin (después de cambiar el role a "admin" manualmente en MongoDB)
+# Registra otro usuario, ej. admin@test.com, y cambia su "role" a "admin" en Compass o mongosh.
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@test.com",
+  "password": "123456"
+}
+
+### Ver mi perfil (con cualquiera de los dos tokens)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{tokenComprador}}
+
+###############################################
+# PRODUCTOS
+###############################################
+
+### Crear producto (solo admin)
+POST {{baseUrl}}/products
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "name": "RTX 5080",
+  "description": "Tarjeta gráfica NVIDIA de gama alta",
+  "price": 4500000,
+  "stock": 10,
+  "sku": "GPU-RTX5080",
+  "category": "GPU",
+  "brand": "NVIDIA",
+  "specs": { "vram": "16GB", "conector": "12VHPWR" }
+}
+
+### Ver catálogo como visitante (sin token) — debería mostrar "disponible", no "stock"
+GET {{baseUrl}}/products
+
+### Ver catálogo como admin — debería mostrar "stock" exacto
+GET {{baseUrl}}/products
+Authorization: Bearer {{tokenAdmin}}
+
+### Ver catálogo filtrado por categoría
+GET {{baseUrl}}/products?category=GPU
+
+### Ver detalle de un producto (reemplaza @productId arriba con un id real)
+GET {{baseUrl}}/products/{{productId}}
+
+### Editar un producto (solo admin)
+PUT {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "price": 4300000,
+  "description": "Tarjeta gráfica NVIDIA de gama alta - precio actualizado"
+}
+
+### Ajustar stock — entrada (solo admin)
+PATCH {{baseUrl}}/products/{{productId}}/stock
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "type": "entrada",
+  "quantity": 5,
+  "reason": "Compra a proveedor"
+}
+
+### Ajustar stock — salida (solo admin)
+PATCH {{baseUrl}}/products/{{productId}}/stock
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "type": "salida",
+  "quantity": 2,
+  "reason": "Ajuste por producto dañado"
+}
+
+### Intentar ajustar stock como comprador (debería dar 403)
+PATCH {{baseUrl}}/products/{{productId}}/stock
+Authorization: Bearer {{tokenComprador}}
+Content-Type: application/json
+
+{
+  "type": "entrada",
+  "quantity": 5,
+  "reason": "No debería funcionar"
+}
+
+### Ver historial de movimientos de inventario (solo admin)
+GET {{baseUrl}}/products/movements
+Authorization: Bearer {{tokenAdmin}}
+
+### Eliminar un producto (solo admin)
+DELETE {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{tokenAdmin}}
+
+###############################################
+# PEDIDOS
+###############################################
+
+### Crear un pedido (solo comprador)
+POST {{baseUrl}}/orders
+Authorization: Bearer {{tokenComprador}}
+Content-Type: application/json
+
+{
+  "items": [
+    { "productId": "{{productId}}", "quantity": 1 }
+  ]
+}
+
+### Ver mis pedidos (como comprador, solo ve los propios)
+GET {{baseUrl}}/orders
+Authorization: Bearer {{tokenComprador}}
+
+### Ver todos los pedidos (como admin, ve todos)
+GET {{baseUrl}}/orders
+Authorization: Bearer {{tokenAdmin}}
+
+### Ver un pedido específico (reemplaza @orderId con un id real)
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{tokenComprador}}
+
+### Intentar ver un pedido ajeno con otro comprador (debería dar 403)
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{tokenComprador}}
+
+### Aprobar un pedido (solo admin) — esto descuenta el stock automáticamente
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "status": "aprobado"
+}
+
+### Marcar como entregado (solo admin)
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "status": "entregado"
+}
+
+### Intentar cambiar estado como comprador (debería dar 403)
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Authorization: Bearer {{tokenComprador}}
+Content-Type: application/json
+
+{
+  "status": "aprobado"
+}
+
+###############################################
+# USUARIOS
+###############################################
+
+### Actualizar mi perfil
+PUT {{baseUrl}}/users/me
+Authorization: Bearer {{tokenComprador}}
+Content-Type: application/json
+
+{
+  "firstName": "Camila",
+  "lastName": "Ruiz Gómez",
+  "phone": "3009999999"
+}
+
+### Ver todos los usuarios (solo admin)
+GET {{baseUrl}}/users
+Authorization: Bearer {{tokenAdmin}}

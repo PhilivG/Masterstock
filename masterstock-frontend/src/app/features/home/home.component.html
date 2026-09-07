@@ -1,0 +1,133 @@
+<app-navbar></app-navbar>
+
+<!-- Hero a todo el viewport -->
+<section class="hero-viewport">
+  <div class="container py-5">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <span class="eyebrow d-block mb-3">MasterStock · Componentes gamer</span>
+        <h1 class="hero-display font-display mb-3">
+          Tu setup lo<br>
+          <span class="text-gradient">merece todo</span>
+        </h1>
+        <p class="text-secondary mb-4" style="max-width:480px;">
+          Componentes originales, stock actualizado en tiempo real y seguimiento claro de tus pedidos, sin pagos en linea ni letra pequeña.
+        </p>
+
+        <div class="d-flex flex-wrap gap-3 mb-5">
+          <a routerLink="/catalogo" class="btn btn-gradient btn-lg px-4">
+            <i class="bi bi-grid"></i> Ver catalogo
+          </a>
+          @if (!auth.isLoggedIn()) {
+            <a routerLink="/registro" class="btn btn-outline-light btn-lg px-4">Crear cuenta</a>
+          }
+        </div>
+
+        <div class="d-flex flex-wrap gap-4">
+          <div class="stat-block">
+            <div class="stat-number text-gradient">{{ totalProducts() || '—' }}</div>
+            <div class="text-muted small">Productos en catalogo</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-number text-gradient">10</div>
+            <div class="text-muted small">Categorias</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-number text-gradient"><i class="bi bi-shield-check"></i></div>
+            <div class="text-muted small">Pedidos verificados por un admin</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5 d-none d-lg-block">
+        <div class="hero-collage">
+          <img src="/products/category-gpu.webp" alt="" class="hero-collage-img hero-collage-img--1" />
+          <img src="/products/category-refrigeracion.webp" alt="" class="hero-collage-img hero-collage-img--2" />
+          <img src="/products/category-perifericos.webp" alt="" class="hero-collage-img hero-collage-img--3" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container pb-5">
+  @if (cartMsg()) {
+    <div class="alert alert-brand-success d-flex align-items-center gap-2" role="status" aria-live="polite">
+      <i class="bi bi-check-circle"></i> {{ cartMsg() }}
+    </div>
+  }
+
+  <!-- Categorias -->
+  <div class="mb-3">
+    <span class="eyebrow d-block">Explora por tipo</span>
+    <h2 class="font-display">Categorias</h2>
+  </div>
+
+  <div class="row g-2 mb-5">
+    @for (cat of categories; track cat.name) {
+      <div class="col-6 col-md-3 col-lg-2">
+        <a [routerLink]="['/catalogo']" [queryParams]="{ category: cat.name }"
+           class="card category-tile text-light border-secondary text-decoration-none h-100 category-tile-photo"
+           [style.background-image]="'linear-gradient(to top, rgba(15,10,23,.92), rgba(15,10,23,.25)), url(' + cat.image + ')'">
+          <div class="d-flex flex-column justify-content-end h-100 p-3">
+            <i class="bi {{ cat.icon }} fs-5 mb-1" style="color:var(--purple-soft);"></i>
+            <div class="small fw-semibold">{{ cat.name }}</div>
+          </div>
+        </a>
+      </div>
+    }
+  </div>
+
+  <!-- Destacados -->
+  <div class="mb-3">
+    <span class="eyebrow d-block">Nuestros favoritos</span>
+    <h2 class="font-display">Productos destacados</h2>
+  </div>
+
+  <div class="row g-3 mb-5">
+    @for (product of featuredProducts(); track product._id) {
+      <div class="col-6 col-md-4">
+        <app-product-card [product]="product" (addToCart)="addToCart($event)"></app-product-card>
+      </div>
+    } @empty {
+      <div class="col-12 d-flex flex-column align-items-center justify-content-center gap-3 py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="text-muted mb-0">Cargando productos...</p>
+      </div>
+    }
+  </div>
+
+  <!-- Por que elegirnos -->
+  <div class="text-center mb-5">
+    <span class="eyebrow d-block">Por que elegirnos</span>
+    <h2 class="font-display mb-4">Mas que un <span class="text-gradient">catalogo</span></h2>
+
+    <div class="row g-3 text-start">
+      <div class="col-md-4">
+        <div class="card bg-dark text-light border-secondary p-3 h-100">
+          <i class="bi bi-box-seam fs-3" style="color:var(--purple-soft);"></i>
+          <div class="text-uppercase small mt-3 mb-2">Stock en tiempo real</div>
+          <p class="text-secondary small">Cada movimiento de inventario queda registrado, sin sorpresas de stock agotado.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card bg-dark text-light border-secondary p-3 h-100">
+          <i class="bi bi-cart-check fs-3" style="color:var(--pink-soft);"></i>
+          <div class="text-uppercase small mt-3 mb-2">Carrito sin fricciones</div>
+          <p class="text-secondary small">Arma tu pedido a tu ritmo y confirmalo cuando estes listo, sin pagos en linea.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card bg-dark text-light border-secondary p-3 h-100">
+          <i class="bi bi-list-check fs-3 text-warning"></i>
+          <div class="text-uppercase small mt-3 mb-2">Historial claro</div>
+          <p class="text-secondary small">Consulta el estado de tus pedidos desde que se crean hasta que se entregan.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>

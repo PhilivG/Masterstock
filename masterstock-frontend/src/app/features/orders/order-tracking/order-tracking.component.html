@@ -1,0 +1,137 @@
+<app-navbar></app-navbar>
+
+<div class="container container-page py-5 max-w-narrow">
+  @if (loading()) {
+    <div class="d-flex flex-column align-items-center justify-content-center gap-3 py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="text-muted mb-0">Cargando pedido...</p>
+    </div>
+  } @else if (errorMsg() || !order()) {
+    <div class="card bg-dark border-secondary p-5 text-center">
+      <i class="bi bi-exclamation-triangle fs-1 text-secondary mb-3"></i>
+      <p class="text-muted mb-3">{{ errorMsg() || 'Pedido no encontrado.' }}</p>
+      <a routerLink="/pedidos" class="btn btn-gradient align-self-center px-4">Ver tus pedidos</a>
+    </div>
+  } @else {
+    @let currentOrder = order()!;
+
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <div>
+        <span class="eyebrow d-block">Rastreo de pedido</span>
+        <h1 class="font-display mb-0">#{{ currentOrder._id.slice(-8) }}</h1>
+      </div>
+      <a routerLink="/pedidos" class="order-header-link">Ver tus pedidos</a>
+    </div>
+
+    <div class="order-card">
+      <div class="order-body">
+        <!-- Items del pedido -->
+        <div class="d-flex flex-column gap-2 mb-3 pb-3 border-bottom border-secondary">
+          @for (item of currentOrder.items; track item.product) {
+            <div class="d-flex align-items-center gap-2">
+              <div class="img-placeholder rounded flex-shrink-0" style="width:56px;height:56px;overflow:hidden;">
+                @if ($any(item.product).images?.length) {
+                  <img [src]="$any(item.product).images[0]" class="w-100 h-100 object-fit-cover" [alt]="$any(item.product).name || 'Producto'" />
+                } @else {
+                  <i class="bi bi-image"></i>
+                }
+              </div>
+              <div class="flex-grow-1">
+                <div class="fw-semibold">{{ $any(item.product).name || 'Producto' }}</div>
+                <div class="text-muted small">Cantidad: {{ item.quantity }}</div>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (currentOrder.resolution) {
+          <div class="resolution-banner resolution-banner--{{ currentOrder.resolution }} mb-3">
+            <i class="bi {{ resolutionInfo(currentOrder.resolution).icon }} fs-5"></i>
+            <div>
+              <div class="fw-semibold">{{ resolutionInfo(currentOrder.resolution).text }}</div>
+              @if (currentOrder.resolutionNote) {
+                <div class="small text-secondary">{{ currentOrder.resolutionNote }}</div>
+              }
+            </div>
+          </div>
+        }
+
+        @if (currentOrder.status === 'cancelado') {
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-x-circle-fill text-danger fs-5"></i>
+            <span class="fw-semibold text-danger">
+              Cancelado{{ currentOrder.cancelledAt ? ' el ' + (currentOrder.cancelledAt | date:'d MMM y') : '' }}
+            </span>
+          </div>
+        } @else {
+          <!-- Tracker de envio estilo Amazon -->
+          <div class="ship-tracker mb-3">
+            <div class="ship-tracker-headline">{{ currentStepLabel(currentOrder) }}</div>
+            <div class="ship-tracker-row">
+              @for (step of trackerSteps(currentOrder); track step.key; let last = $last) {
+                <span class="ship-tracker-dot" [class.ship-tracker-dot--done]="step.done"></span>
+                @if (!last) {
+                  <span class="ship-tracker-line" [class.ship-tracker-line--done]="step.lineDone"></span>
+                }
+              }
+            </div>
+            <div class="ship-tracker-labels">
+              @for (step of trackerSteps(currentOrder); track step.key) {
+                <div class="ship-tracker-col">
+                  <span class="ship-tracker-label" [class.ship-tracker-label--done]="step.done">{{ step.label }}</span>
+                  @if (step.date) {
+                    <span class="ship-tracker-date">{{ step.date | date:'d MMM' }}</span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <button type="button" class="btn btn-gradient btn-sm mb-4" [disabled]="reordering()" (click)="reorder()">
+          <i class="bi bi-arrow-repeat"></i> {{ reordering() ? 'Agregando...' : 'Comprar de nuevo' }}
+        </button>
+
+        <!-- Direccion de envio -->
+        @if (currentOrder.shippingAddress) {
+          <div class="pt-3 border-top border-secondary">
+            <h2 class="h6 mb-2">Direccion de envio</h2>
+            <div class="small text-secondary">
+              {{ currentOrder.shippingAddress.address }}<br>
+              {{ currentOrder.shippingAddress.city }}, {{ currentOrder.shippingAddress.department }}<br>
+              <i class="bi bi-telephone"></i> {{ currentOrder.shippingAddress.phone }}
+              @if (currentOrder.shippingAddress.notes) {
+                <br><span class="fst-italic">"{{ currentOrder.shippingAddress.notes }}"</span>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Resumen de pago -->
+        <div class="pt-3 mt-3 border-top border-secondary">
+          <h2 class="h6 mb-2">Resumen de pago</h2>
+          <div class="d-flex justify-content-between small">
+            <span class="text-secondary">Subtotal</span>
+            <span class="font-mono">{{ (currentOrder.subtotal ?? currentOrder.total) | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+          <div class="d-flex justify-content-between small mb-2">
+            <span class="text-secondary">Envio</span>
+            @if (!currentOrder.shippingCost) {
+              <span class="font-mono text-success">Gratis</span>
+            } @else {
+              <span class="font-mono">{{ currentOrder.shippingCost | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            }
+          </div>
+          <div class="d-flex justify-content-between fw-semibold pt-2 border-top border-secondary">
+            <span>Total</span>
+            <span class="font-mono">{{ currentOrder.total | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<app-footer></app-footer>

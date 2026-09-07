@@ -1,0 +1,119 @@
+<app-navbar></app-navbar>
+
+<div class="container max-w-form" style="padding-top:32px; padding-bottom:48px;">
+  <h1 class="font-display mb-4">{{ productId() ? 'Editar producto' : 'Nuevo producto' }}</h1>
+
+  <div class="card bg-dark text-light border-secondary corner-notch-sm p-4 mb-4">
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="mb-3">
+        <label class="form-label" for="pf-name">Nombre</label>
+        <input id="pf-name" type="text" formControlName="name" class="form-control text-light border-secondary" [class.is-invalid]="fieldError(form.get('name'))" />
+        @if (fieldError(form.get('name')); as msg) {
+          <div class="invalid-feedback d-block">{{ msg }}</div>
+        }
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="pf-description">Descripcion</label>
+        <textarea id="pf-description" formControlName="description" class="form-control text-light border-secondary" rows="3" [class.is-invalid]="fieldError(form.get('description'))"></textarea>
+        @if (fieldError(form.get('description')); as msg) {
+          <div class="invalid-feedback d-block">{{ msg }}</div>
+        }
+      </div>
+
+      <div class="row">
+        <div class="col-6 mb-3">
+          <label class="form-label" for="pf-price">Precio (COP)</label>
+          <input id="pf-price" type="number" formControlName="price" class="form-control text-light border-secondary" [class.is-invalid]="fieldError(form.get('price'))" />
+          @if (fieldError(form.get('price')); as msg) {
+            <div class="invalid-feedback d-block">{{ msg }}</div>
+          }
+        </div>
+        <div class="col-6 mb-3">
+          <label class="form-label" for="pf-sku">SKU</label>
+          <input id="pf-sku" type="text" formControlName="sku" class="form-control text-light border-secondary" [class.is-invalid]="fieldError(form.get('sku'))" />
+          @if (fieldError(form.get('sku')); as msg) {
+            <div class="invalid-feedback d-block">{{ msg }}</div>
+          }
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-6 mb-3">
+          <label class="form-label" for="pf-category">Categoria</label>
+          <input id="pf-category" type="text" formControlName="category" class="form-control text-light border-secondary" placeholder="GPU, CPU, RAM..." [class.is-invalid]="fieldError(form.get('category'))" />
+          @if (fieldError(form.get('category')); as msg) {
+            <div class="invalid-feedback d-block">{{ msg }}</div>
+          }
+        </div>
+        <div class="col-6 mb-3">
+          <label class="form-label" for="pf-brand">Marca</label>
+          <input id="pf-brand" type="text" formControlName="brand" class="form-control text-light border-secondary" />
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="pf-images">URL de imagen</label>
+        <input id="pf-images" type="text" formControlName="images" class="form-control text-light border-secondary" placeholder="https://..." />
+      </div>
+
+      @if (errorMsg()) {
+        <div class="alert alert-brand-danger d-flex align-items-center gap-2 py-2 px-3 mb-3" role="alert">
+          <i class="bi bi-exclamation-circle"></i>
+          <span class="small">{{ errorMsg() }}</span>
+        </div>
+      }
+
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid || loading()">
+        {{ loading() ? 'Guardando...' : 'Guardar producto' }}
+      </button>
+    </form>
+  </div>
+
+  @if (productId()) {
+    <div class="card bg-dark text-light border-secondary corner-notch-sm p-4">
+      <h2 class="h5 mb-1">Ajustar stock</h2>
+      <p class="text-secondary small mb-3">
+        Stock actual: <span class="font-mono">{{ currentStock() }}</span>
+      </p>
+
+      <form [formGroup]="stockForm" (ngSubmit)="adjustStock()">
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label" for="pf-stock-type">Tipo</label>
+            <select id="pf-stock-type" formControlName="type" class="form-select text-light border-secondary">
+              <option value="entrada">Entrada</option>
+              <option value="salida">Salida</option>
+            </select>
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label" for="pf-stock-quantity">Cantidad</label>
+            <input id="pf-stock-quantity" type="number" formControlName="quantity" class="form-control text-light border-secondary" [class.is-invalid]="fieldError(stockForm.get('quantity'))" />
+            @if (fieldError(stockForm.get('quantity')); as msg) {
+              <div class="invalid-feedback d-block">{{ msg }}</div>
+            }
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="pf-stock-reason">Razon</label>
+          <input id="pf-stock-reason" type="text" formControlName="reason" class="form-control text-light border-secondary" placeholder="Compra a proveedor, ajuste, etc." [class.is-invalid]="fieldError(stockForm.get('reason'))" />
+          @if (fieldError(stockForm.get('reason')); as msg) {
+            <div class="invalid-feedback d-block">{{ msg }}</div>
+          }
+        </div>
+
+        @if (stockMsg()) {
+          <div class="alert alert-brand-success d-flex align-items-center gap-2 py-2 px-3 mb-3" role="status">
+            <i class="bi bi-check-circle"></i>
+            <span class="small">{{ stockMsg() }}</span>
+          </div>
+        }
+
+        <button type="submit" class="btn btn-outline-primary" [disabled]="stockForm.invalid">Ajustar stock</button>
+      </form>
+    </div>
+  }
+</div>
+
+<app-footer></app-footer>

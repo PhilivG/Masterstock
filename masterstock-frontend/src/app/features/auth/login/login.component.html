@@ -1,0 +1,83 @@
+<div class="login-split">
+  <div class="login-brand-panel d-none d-lg-flex flex-column justify-content-between">
+    <a routerLink="/" class="font-display fs-3 text-white text-decoration-none">MasterStock</a>
+
+    <div>
+      <span class="eyebrow d-block mb-2" style="color:rgba(255,255,255,.75);">Bienvenido de vuelta</span>
+      <h1 class="font-display display-5 text-white mb-3">Tu setup lo merece todo</h1>
+      <p class="mb-4" style="color:rgba(255,255,255,.85); max-width:420px;">
+        Componentes originales, stock verificado y seguimiento claro de cada pedido.
+      </p>
+
+      <div class="d-flex flex-column gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="login-feature-icon"><i class="bi bi-boxes"></i></div>
+          <span class="text-white">Stock actualizado en tiempo real</span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <div class="login-feature-icon"><i class="bi bi-truck"></i></div>
+          <span class="text-white">Rastrea tus pedidos paso a paso</span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <div class="login-feature-icon"><i class="bi bi-shield-check"></i></div>
+          <span class="text-white">Pedidos verificados por un admin</span>
+        </div>
+      </div>
+    </div>
+
+    <span class="small" style="color:rgba(255,255,255,.6);">© 2026 MasterStock</span>
+  </div>
+
+  <div class="login-form-panel d-flex align-items-center justify-content-center">
+    <div class="w-100 max-w-auth">
+      <div class="text-center mb-4 d-lg-none">
+        <a routerLink="/" class="font-display fs-3 text-gradient text-decoration-none">MasterStock</a>
+      </div>
+
+      <h1 class="h3 mb-1">Iniciar sesion</h1>
+      <p class="text-secondary small mb-4">Entra para armar tu pedido y ver tu historial.</p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="mb-3">
+          <label class="form-label" for="login-email">Email</label>
+          <div class="input-group">
+            <span class="input-group-text border-secondary text-secondary"><i class="bi bi-envelope"></i></span>
+            <input id="login-email" type="email" formControlName="email" class="form-control text-light border-secondary" placeholder="tu@email.com" [class.is-invalid]="fieldError(form.get('email'))" />
+          </div>
+          @if (fieldError(form.get('email')); as msg) {
+            <div class="invalid-feedback d-block">{{ msg }}</div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="login-password">Contrasena</label>
+          <div class="input-group">
+            <span class="input-group-text border-secondary text-secondary"><i class="bi bi-lock"></i></span>
+            <input id="login-password" [type]="showPassword() ? 'text' : 'password'" formControlName="password" class="form-control text-light border-secondary" placeholder="********" [class.is-invalid]="fieldError(form.get('password'))" />
+            <button type="button" class="btn btn-outline-light" (click)="togglePassword()" tabindex="-1" [attr.aria-label]="showPassword() ? 'Ocultar contrasena' : 'Mostrar contrasena'">
+              <i class="bi" [class.bi-eye]="!showPassword()" [class.bi-eye-slash]="showPassword()"></i>
+            </button>
+          </div>
+          @if (fieldError(form.get('password')); as msg) {
+            <div class="invalid-feedback d-block">{{ msg }}</div>
+          }
+        </div>
+
+        @if (errorMsg()) {
+          <div class="alert alert-brand-danger d-flex align-items-center gap-2 py-2 px-3 mb-3" role="alert">
+            <i class="bi bi-exclamation-circle"></i>
+            <span class="small">{{ errorMsg() }}</span>
+          </div>
+        }
+
+        <button type="submit" class="btn btn-gradient w-100" [disabled]="form.invalid || loading()">
+          {{ loading() ? 'Ingresando...' : 'Iniciar sesion' }}
+        </button>
+      </form>
+
+      <p class="text-secondary text-center small mt-4 mb-0">
+        No tienes cuenta? <a routerLink="/registro" class="text-gradient fw-semibold">Registrate</a>
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,157 @@
+<app-navbar></app-navbar>
+
+<div class="container container-page py-5">
+  @if (loading()) {
+    <div class="d-flex flex-column align-items-center justify-content-center gap-3 py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="text-muted mb-0">Cargando producto...</p>
+    </div>
+  } @else if (!product()) {
+    <div class="card bg-dark border-secondary p-5 text-center">
+      <i class="bi bi-exclamation-triangle fs-1 text-secondary mb-3"></i>
+      <p class="text-muted mb-3">Producto no encontrado.</p>
+      <a routerLink="/catalogo" class="btn btn-outline-primary align-self-center px-4">Volver al catalogo</a>
+    </div>
+  } @else {
+    <!-- Migas de pan -->
+    <nav class="small mb-4" aria-label="breadcrumb">
+      <a routerLink="/catalogo" class="text-secondary text-decoration-none">Catalogo</a>
+      <span class="text-muted mx-2">/</span>
+      <a [routerLink]="['/catalogo']" [queryParams]="{ category: product()!.category }" class="text-secondary text-decoration-none">{{ product()!.category }}</a>
+      <span class="text-muted mx-2">/</span>
+      <span class="text-muted">{{ product()!.name }}</span>
+    </nav>
+
+    <div class="row g-5 align-items-start">
+      <!-- Galeria -->
+      <div class="col-lg-6">
+        <div class="position-relative mb-3">
+          @if (product()!.disponible !== undefined) {
+            <span class="badge badge-corner" [class.bg-success]="product()!.disponible" [class.bg-warning]="!product()!.disponible">
+              <span class="status-dot"></span>{{ product()!.disponible ? 'En stock' : 'Agotado' }}
+            </span>
+          }
+          <div class="card bg-dark border-secondary corner-notch ratio ratio-1x1 img-placeholder overflow-hidden">
+            @if (product()!.images.length) {
+              <img [src]="activeImage()" [alt]="product()!.name" class="w-100 h-100 object-fit-cover" />
+            } @else {
+              <i class="bi bi-image fs-1"></i>
+            }
+          </div>
+        </div>
+
+        @if (product()!.images.length > 1) {
+          <div class="d-flex gap-2">
+            @for (img of product()!.images; track img; let i = $index) {
+              <button
+                type="button"
+                class="thumb-btn"
+                [class.thumb-btn--active]="activeIndex() === i"
+                (click)="activeIndex.set(i)"
+                [attr.aria-label]="'Ver foto ' + (i + 1) + ' de ' + product()!.name"
+              >
+                <img [src]="img" [alt]="''" class="w-100 h-100 object-fit-cover" />
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Info -->
+      <div class="col-lg-6">
+        <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+          @if (product()!.brand) {
+            <span class="eyebrow">{{ product()!.brand }}</span>
+            <span class="text-muted">&middot;</span>
+          }
+          <a [routerLink]="['/catalogo']" [queryParams]="{ category: product()!.category }" class="eyebrow text-decoration-none">
+            {{ product()!.category }}
+          </a>
+        </div>
+
+        <h1 class="mb-2">{{ product()!.name }}</h1>
+        <p class="text-muted small font-mono mb-3">SKU: {{ product()!.sku }}</p>
+        <p class="text-secondary mb-4">{{ product()!.description }}</p>
+
+        @if (product()!.specs) {
+          <div class="card bg-dark border-secondary p-3 mb-4">
+            <span class="eyebrow d-block mb-2">Especificaciones</span>
+            @for (spec of product()!.specs | keyvalue; track spec.key; let last = $last) {
+              <div class="d-flex justify-content-between small py-2" [class.border-bottom]="!last" style="border-color:var(--border-subtle);">
+                <span class="text-muted text-capitalize">{{ spec.key }}</span>
+                <span class="font-mono fw-semibold">{{ spec.value }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="d-flex align-items-end gap-2 mb-4">
+          <span class="font-mono fs-2 fw-semibold">{{ product()!.price | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+        </div>
+
+        <div class="d-flex align-items-center flex-wrap gap-3 mb-4">
+          <div class="qty-stepper">
+            <button class="btn btn-outline-light btn-sm" (click)="changeQuantity(-1)" [attr.aria-label]="'Reducir cantidad'">-</button>
+            <span class="font-mono">{{ quantity() }}</span>
+            <button class="btn btn-outline-light btn-sm" (click)="changeQuantity(1)" [attr.aria-label]="'Aumentar cantidad'">+</button>
+          </div>
+
+          <button class="btn btn-gradient flex-grow-1" (click)="addToCart()">
+            <i class="bi bi-cart-plus"></i> Agregar al carrito
+            @if (quantity() > 1) {
+              <span class="font-mono">&middot; {{ subtotal() | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            }
+          </button>
+        </div>
+
+        @if (addedMsg()) {
+          <div class="alert alert-brand-success d-flex align-items-center gap-2 mb-4" role="status" aria-live="polite">
+            <i class="bi bi-check-circle"></i>
+            <span>Agregado al carrito.</span>
+            <a routerLink="/carrito" class="text-gradient fw-semibold ms-auto">Ver carrito</a>
+          </div>
+        }
+
+        <div class="row g-2">
+          <div class="col-4">
+            <div class="d-flex flex-column align-items-center text-center gap-1 p-2">
+              <i class="bi bi-box-seam text-purple-soft fs-5"></i>
+              <span class="small text-muted">Stock real</span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="d-flex flex-column align-items-center text-center gap-1 p-2">
+              <i class="bi bi-shield-check text-purple-soft fs-5"></i>
+              <span class="small text-muted">Sin pagos en linea</span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="d-flex flex-column align-items-center text-center gap-1 p-2">
+              <i class="bi bi-truck text-purple-soft fs-5"></i>
+              <span class="small text-muted">Envios a Colombia</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (relatedProducts().length > 0) {
+      <div class="mt-5 pt-4 border-top border-secondary">
+        <span class="eyebrow d-block">Mas de {{ product()!.category }}</span>
+        <h2 class="font-display mb-4">Tambien te puede interesar</h2>
+
+        <div class="row g-3">
+          @for (related of relatedProducts(); track related._id) {
+            <div class="col-6 col-md-3">
+              <app-product-card [product]="related" (addToCart)="addRelatedToCart($event)"></app-product-card>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<app-footer></app-footer>

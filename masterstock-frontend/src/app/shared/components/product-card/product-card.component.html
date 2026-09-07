@@ -1,0 +1,44 @@
+<div class="card bg-dark text-light border-secondary h-100 product-card-hover position-relative">
+  @if (!adminMode) {
+    @if (product.disponible !== undefined) {
+      <span class="badge badge-corner" [class.bg-success]="product.disponible" [class.bg-warning]="!product.disponible">
+        <span class="status-dot"></span>{{ product.disponible ? 'En stock' : 'Agotado' }}
+      </span>
+    }
+  } @else if (product.stock !== undefined) {
+    <span class="badge badge-corner"
+      [class.bg-success]="product.stock > 5"
+      [class.bg-warning]="product.stock > 0 && product.stock <= 5"
+      [class.bg-danger]="product.stock === 0">
+      Stock: {{ product.stock }}
+    </span>
+  }
+
+  <a [routerLink]="['/catalogo', product._id]" class="text-decoration-none">
+    <div class="ratio ratio-1x1 img-placeholder" (mouseenter)="hovered.set(true)" (mouseleave)="hovered.set(false)">
+      @if (product.images.length) {
+        <img [src]="product.images[0]" [alt]="product.name" class="card-img-top object-fit-cover img-fade" />
+        @if (product.images[1]) {
+          <img [src]="product.images[1]" [alt]="product.name" class="card-img-top object-fit-cover img-fade img-fade-secondary" [class.img-fade-visible]="hovered()" />
+        }
+      } @else {
+        <i class="bi bi-image fs-2"></i>
+      }
+    </div>
+  </a>
+
+  <div class="card-body d-flex flex-column">
+    <span class="text-muted small">{{ product.brand || product.category }}</span>
+    <h6 class="card-title mt-1 mb-2">{{ product.name }}</h6>
+
+    <div class="d-flex align-items-center justify-content-between flex-wrap row-gap-2 mt-auto">
+      <span class="fw-semibold font-mono">{{ product.price | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+
+      @if (!adminMode) {
+        <button (click)="addToCart.emit(product)" class="btn btn-primary btn-sm" title="Agregar al carrito">
+          <i class="bi bi-cart-plus"></i> Agregar
+        </button>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,143 @@
+<app-navbar></app-navbar>
+
+<div class="container py-5">
+  <span class="eyebrow d-block">Catalogo</span>
+  <h1 class="font-display mb-1">Componentes disponibles</h1>
+  <p class="text-secondary mb-4">Stock actualizado en tiempo real.</p>
+
+  @if (cartMsg()) {
+    <div class="alert alert-brand-success d-flex align-items-center gap-2" role="status" aria-live="polite">
+      <i class="bi bi-check-circle"></i> {{ cartMsg() }}
+    </div>
+  }
+
+  <div class="row g-4">
+    <!-- Filtros -->
+    <div class="col-lg-3">
+      <!-- Solo en mobile/tablet: boton que abre/cierra el panel de filtros -->
+      <button
+        type="button"
+        class="btn btn-outline-light btn-sm w-100 d-lg-none mb-3 d-flex justify-content-between align-items-center"
+        data-bs-toggle="collapse"
+        data-bs-target="#filtersPanel"
+        aria-expanded="false"
+        aria-controls="filtersPanel"
+      >
+        <span><i class="bi bi-sliders"></i> Filtros</span>
+        <i class="bi bi-chevron-down filters-toggle-icon"></i>
+      </button>
+
+      <!-- "collapse" lo colapsa en mobile por defecto; "d-lg-block" lo fuerza
+           siempre visible desde lg hacia arriba, sin depender del JS de Bootstrap -->
+      <div class="collapse d-lg-block" id="filtersPanel">
+        <div class="card bg-dark border-secondary p-3 mb-3">
+          <div class="form-check form-switch mb-1">
+            <input class="form-check-input" type="checkbox" id="onlyAvailable"
+                   [ngModel]="onlyAvailable()" (ngModelChange)="onlyAvailable.set($event)" />
+            <label class="form-check-label small" for="onlyAvailable">Solo disponibles</label>
+          </div>
+        </div>
+
+        <div class="card bg-dark border-secondary p-3 mb-3">
+          <label class="form-label small text-secondary mb-2">Categoria</label>
+
+          <!-- Mobile/tablet: desplegable -->
+          <select class="form-select form-select-sm d-lg-none"
+                  [ngModel]="activeCategory() ?? ''" (ngModelChange)="filterByCategory($event || null)">
+            <option value="">Todos</option>
+            @for (cat of categories; track cat) {
+              <option [value]="cat">{{ cat }}</option>
+            }
+          </select>
+
+          <!-- Desktop: lista de botones -->
+          <div class="d-none d-lg-flex flex-column gap-1">
+            <button type="button" class="btn btn-sm text-start category-list-item" [class.category-list-item--active]="!activeCategory()" (click)="filterByCategory(null)">
+              Todos
+            </button>
+            @for (cat of categories; track cat) {
+              <button type="button" class="btn btn-sm text-start category-list-item" [class.category-list-item--active]="activeCategory() === cat" (click)="filterByCategory(cat)">
+                {{ cat }}
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (brands().length > 0) {
+          <div class="card bg-dark border-secondary p-3 mb-3">
+            <label class="form-label small text-secondary mb-2">Marca</label>
+            @for (brand of brands(); track brand) {
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" [id]="'brand-' + brand"
+                       [checked]="activeBrands().has(brand)" (change)="toggleBrand(brand)" />
+                <label class="form-check-label small" [for]="'brand-' + brand">{{ brand }}</label>
+              </div>
+            }
+          </div>
+        }
+
+        <button class="btn btn-outline-light btn-sm w-100" (click)="clearFilters()">
+          <i class="bi bi-x-circle"></i> Limpiar filtros
+        </button>
+      </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="col-lg-9">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div class="d-flex align-items-center flex-wrap gap-2">
+          <span class="text-secondary small">
+            @if (!loading()) {
+              Mostrando {{ filteredProducts().length }} de {{ products().length }} productos
+            }
+          </span>
+
+          @if (search()) {
+            <span class="filter-chip rounded-pill d-inline-flex align-items-center gap-2 px-3 py-1 small">
+              Buscando: "{{ search() }}"
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                style="font-size:.55rem;"
+                (click)="clearSearch()"
+                aria-label="Quitar busqueda"
+              ></button>
+            </span>
+          }
+        </div>
+
+        <select class="form-select form-select-sm text-light border-secondary" style="width:auto;"
+                [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)">
+          <option value="relevancia">Relevancia</option>
+          <option value="precio-asc">Precio: menor a mayor</option>
+          <option value="precio-desc">Precio: mayor a menor</option>
+          <option value="nombre">Nombre A-Z</option>
+        </select>
+      </div>
+
+      @if (loading()) {
+        <div class="d-flex flex-column align-items-center justify-content-center gap-3 py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <p class="text-muted mb-0">Cargando catalogo...</p>
+        </div>
+      } @else if (filteredProducts().length === 0) {
+        <div class="card bg-dark border-secondary p-5 text-center">
+          <i class="bi bi-search fs-1 text-secondary mb-2"></i>
+          <p class="text-muted mb-0">No hay productos que coincidan con los filtros.</p>
+        </div>
+      } @else {
+        <div class="row g-3">
+          @for (product of filteredProducts(); track product._id) {
+            <div class="col-6 col-md-4 col-xl-3">
+              <app-product-card [product]="product" (addToCart)="addToCart($event)"></app-product-card>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>

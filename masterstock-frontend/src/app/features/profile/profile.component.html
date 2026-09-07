@@ -1,0 +1,130 @@
+<app-navbar></app-navbar>
+
+<div class="container container-page max-w-wide" style="padding-top:40px; padding-bottom:56px;">
+  <span class="eyebrow d-block">Cuenta</span>
+  <h1 class="font-display mb-4">Mi perfil</h1>
+
+  <!-- Portada + avatar -->
+  <div class="profile-cover mb-4">
+    <div class="profile-cover-banner"></div>
+    <div class="profile-cover-body">
+      <div class="profile-avatar">{{ initials() }}</div>
+      <div class="flex-grow-1">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <h2 class="h4 mb-0">{{ auth.currentUser()?.firstName }} {{ auth.currentUser()?.lastName }}</h2>
+          <span class="badge" [class.bg-success]="auth.isAdmin()" [class.bg-secondary]="!auth.isAdmin()">
+            {{ auth.currentUser()?.role }}
+          </span>
+        </div>
+        <div class="text-secondary small"><i class="bi bi-envelope"></i> {{ auth.currentUser()?.email }}</div>
+      </div>
+      @if (!auth.isAdmin()) {
+        <a routerLink="/pedidos" class="btn btn-gradient btn-sm">
+          <i class="bi bi-bag"></i> Ver mis pedidos
+        </a>
+      }
+    </div>
+  </div>
+
+  <!-- Estadisticas -->
+  <div class="row g-3 mb-4">
+    @if (auth.currentUser()?.createdAt) {
+      <div class="col-6 col-md-4">
+        <div class="profile-stat-card">
+          <div class="profile-stat-icon"><i class="bi bi-calendar-heart"></i></div>
+          <div>
+            <div class="profile-stat-label">Miembro desde</div>
+            <div class="profile-stat-value">{{ auth.currentUser()!.createdAt | date:'MMM y' }}</div>
+          </div>
+        </div>
+      </div>
+    }
+    <div class="col-6 col-md-4">
+      <div class="profile-stat-card">
+        <div class="profile-stat-icon"><i class="bi" [class.bi-shield-check]="auth.isAdmin()" [class.bi-person-check]="!auth.isAdmin()"></i></div>
+        <div>
+          <div class="profile-stat-label">Rol</div>
+          <div class="profile-stat-value">{{ auth.isAdmin() ? 'Administrador' : 'Comprador' }}</div>
+        </div>
+      </div>
+    </div>
+    @if (orderCount() !== null) {
+      <div class="col-6 col-md-4">
+        <div class="profile-stat-card">
+          <div class="profile-stat-icon"><i class="bi bi-bag-check"></i></div>
+          <div>
+            <div class="profile-stat-label">Pedidos realizados</div>
+            <div class="profile-stat-value">{{ orderCount() }}</div>
+          </div>
+        </div>
+      </div>
+    }
+    @if (totalSpent() !== null) {
+      <div class="col-6 col-md-4">
+        <div class="profile-stat-card">
+          <div class="profile-stat-icon"><i class="bi bi-wallet2"></i></div>
+          <div>
+            <div class="profile-stat-label">Total invertido</div>
+            <div class="profile-stat-value font-mono">{{ totalSpent() | currency:'COP':'symbol-narrow':'1.0-0' }}</div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Editar informacion -->
+  <div class="card bg-dark text-light border-secondary corner-notch-sm p-4">
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <i class="bi bi-pencil-square text-gradient fs-5"></i>
+      <h2 class="h6 mb-0">Editar informacion</h2>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="mb-3">
+        <label class="form-label" for="profile-email">Email</label>
+        <div class="input-group">
+          <span class="input-group-text border-secondary text-secondary"><i class="bi bi-envelope"></i></span>
+          <input id="profile-email" type="text" class="form-control text-light border-secondary" [value]="auth.currentUser()?.email" disabled />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-6 mb-3">
+          <label class="form-label" for="profile-firstName">Nombre</label>
+          <input id="profile-firstName" type="text" formControlName="firstName" class="form-control text-light border-secondary" [class.is-invalid]="fieldError(form.get('firstName'))" />
+          @if (fieldError(form.get('firstName')); as msg) {
+            <div class="invalid-feedback d-block">{{ msg }}</div>
+          }
+        </div>
+        <div class="col-sm-6 mb-3">
+          <label class="form-label" for="profile-lastName">Apellido</label>
+          <input id="profile-lastName" type="text" formControlName="lastName" class="form-control text-light border-secondary" [class.is-invalid]="fieldError(form.get('lastName'))" />
+          @if (fieldError(form.get('lastName')); as msg) {
+            <div class="invalid-feedback d-block">{{ msg }}</div>
+          }
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="profile-phone">Telefono</label>
+        <div class="input-group">
+          <span class="input-group-text border-secondary text-secondary"><i class="bi bi-telephone"></i></span>
+          <input id="profile-phone" type="tel" formControlName="phone" class="form-control text-light border-secondary" />
+        </div>
+      </div>
+
+      @if (successMsg()) {
+        <div class="alert alert-brand-success d-flex align-items-center gap-2 py-2 px-3 mb-3" role="status">
+          <i class="bi bi-check-circle"></i>
+          <span class="small">{{ successMsg() }}</span>
+        </div>
+      }
+
+      <button type="submit" class="btn btn-gradient" [disabled]="form.invalid || loading()">
+        {{ loading() ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+    </form>
+  </div>
+</div>
+
+<app-footer></app-footer>

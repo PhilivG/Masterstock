@@ -1,0 +1,1195 @@
+/* ===========================
+   Imports
+=========================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap");
+
+/* ===========================
+   Theme
+=========================== */
+
+:root {
+
+  /* Bootstrap */
+
+  --bs-primary: #a855f7;
+  --bs-primary-rgb: 168, 85, 247;
+
+  --bs-success: #22d3b4;
+  --bs-success-rgb: 34, 211, 180;
+
+  --bs-warning: #f5a623;
+  --bs-warning-rgb: 245, 166, 35;
+
+  --bs-danger: #ef4444;
+  --bs-danger-rgb: 239, 68, 68;
+
+  --bs-dark: #1c1226;
+  --bs-dark-rgb: 28, 18, 38;
+
+  --bs-body-bg: #0f0a17;
+  --bs-body-color: #f6eefb;
+  --bs-body-font-family: "Inter", sans-serif;
+
+  --bs-link-color: var(--bs-primary);
+  --bs-link-hover-color: #c026d3;
+
+  /* Theme */
+
+  --bg-page: #0f0a17;
+  --bg-surface: #1c1226;
+  --bg-surface-hover: #291a38;
+
+  --text-primary: #f6eefb;
+  --text-secondary: #b6a8ce;
+  --text-muted: #8c7fa3;
+
+  --border-subtle: #33253f;
+
+  /* Marca: degradado morado -> rosa */
+  --purple: #a855f7;
+  --purple-hover: #9333ea;
+  --purple-soft: #c084fc;
+
+  --pink: #ec4899;
+  --pink-hover: #db2777;
+  --pink-soft: #f472b6;
+
+  --gradient-brand: linear-gradient(135deg, var(--purple), var(--pink));
+  --gradient-page: radial-gradient(ellipse 60% 50% at 15% 0%, rgba(168,85,247,.25), transparent 60%),
+                   radial-gradient(ellipse 50% 40% at 100% 20%, rgba(236,72,153,.18), transparent 60%),
+                   radial-gradient(ellipse 50% 40% at 20% 100%, rgba(168,85,247,.12), transparent 60%);
+
+  /* Grid muy sutil de fondo, da textura "tech" sin competir con el contenido */
+  --grid-pattern: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+
+  --success-bg: rgba(34,211,180,.1);
+  --warning-bg: rgba(245,166,35,.1);
+  --danger-bg: rgba(239,68,68,.1);
+
+  --radius-card: 12px;
+  --radius-control: 8px;
+
+  --font-display: "Bebas Neue", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Anchos de contenido reutilizables (formularios, auth, paneles angostos) */
+  --max-w-auth: 420px;
+  --max-w-form: 640px;
+  --max-w-narrow: 760px;
+  --max-w-wide: 820px;
+}
+
+/* ===========================
+   Base
+=========================== */
+
+html,
+body{
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+}
+
+body{
+    background-image: var(--gradient-page), var(--grid-pattern);
+    background-size: auto, auto, auto, 42px 42px, 42px 42px;
+    background-attachment: fixed;
+    min-height: 100dvh;
+}
+
+/* Bootstrap limita .container a 1320px incluso en monitores grandes; en
+   pantallas anchas eso deja demasiado margen muerto a los lados. */
+@media (min-width: 1400px){
+    .container{
+        max-width: 1600px;
+    }
+}
+
+@media (min-width: 1650px){
+    .container{
+        max-width: 1780px;
+    }
+}
+
+
+*{
+    box-sizing:border-box;
+}
+
+a{
+    text-decoration:none;
+    color:inherit;
+}
+
+h1,h2,h3,h4{
+    font-family:var(--font-display);
+    text-transform:uppercase;
+    letter-spacing:.5px;
+}
+
+app-navbar,
+app-footer,
+app-product-card{
+    display:block;
+}
+
+/* min-height, no height fija: en pantallas chicas el contenido puede superar
+   el viewport y con `height` se recortaba en vez de scrollear */
+.container-page {
+  min-height: 100dvh;
+}
+
+/* ===========================
+   Bootstrap Overrides
+=========================== */
+
+.btn{
+    border-radius:var(--radius-control);
+    font-weight:500;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+}
+
+.btn-primary{
+    background:var(--purple);
+    border-color:var(--purple);
+}
+
+.btn-primary:hover{
+    background:var(--purple-hover);
+    border-color:var(--purple-hover);
+}
+
+/* Bootstrap resuelve el fondo de un boton deshabilitado con .btn:disabled,
+   que tiene mas especificidad que .btn-primary solo -- sin esto, un
+   btn-primary deshabilitado se veia azul (el primary default de Bootstrap)
+   en vez de morado. */
+.btn-primary:disabled,
+.btn-primary.disabled{
+    background:var(--purple);
+    border-color:var(--purple);
+}
+
+.btn-outline-danger:disabled,
+.btn-outline-danger.disabled{
+    color:var(--bs-danger);
+    border-color:var(--bs-danger);
+}
+
+.btn-outline-primary{
+    color:var(--purple);
+    border-color:var(--purple);
+}
+
+.btn-outline-primary:hover{
+    background:var(--purple);
+    border-color:var(--purple);
+}
+
+.form-control,
+.form-select{
+
+    background:var(--bg-page);
+    border-color:var(--border-subtle);
+    color:var(--text-primary);
+    border-radius:var(--radius-control);
+
+}
+
+.form-control:focus,
+.form-select:focus{
+
+    background:var(--bg-page);
+    color:var(--text-primary);
+
+    border-color:var(--purple);
+
+    box-shadow:0 0 0 .2rem rgba(139,92,246,.15);
+
+}
+
+.form-control::placeholder{
+
+    color:var(--text-muted);
+
+}
+
+.card{
+
+    background:var(--bg-surface);
+    border:1px solid var(--border-subtle);
+    border-radius:var(--radius-card);
+
+}
+
+.dropdown-menu{
+
+    background:var(--bg-surface);
+    border-color:var(--border-subtle);
+
+}
+
+.dropdown-item{
+
+    color:var(--text-primary);
+
+}
+
+.dropdown-item:hover{
+
+    background:var(--bg-surface-hover);
+
+}
+
+.nav-link{
+
+    color:var(--text-secondary);
+
+}
+
+.nav-link:hover{
+
+    color:white;
+
+}
+
+.nav-link.active{
+
+    color:var(--purple)!important;
+
+}
+
+.table{
+
+    color:var(--text-primary);
+
+}
+
+.table>:not(caption)>*>*{
+
+    background:transparent;
+
+    border-color:var(--border-subtle);
+
+}
+
+.modal-content{
+
+    background:var(--bg-surface);
+
+    border-color:var(--border-subtle);
+
+}
+
+/* ===========================
+   Components
+=========================== */
+
+.corner-notch{
+
+    clip-path:polygon(
+    0 0,
+    calc(100% - 24px) 0,
+    100% 24px,
+    100% 100%,
+    0 100%
+    );
+
+}
+
+.corner-notch-sm{
+
+    clip-path:polygon(
+    0 0,
+    calc(100% - 16px) 0,
+    100% 16px,
+    100% 100%,
+    0 100%
+    );
+
+}
+
+.img-placeholder{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:linear-gradient(
+        160deg,
+        #2a2438,
+        #17151d
+    );
+
+    color:var(--text-muted);
+
+}
+
+.filter-chip{
+
+    background:var(--bg-surface);
+
+    color:var(--text-secondary);
+
+    border:1px solid var(--border-subtle);
+
+}
+
+.filter-chip:hover{
+
+    border-color:var(--purple);
+
+}
+
+.category-list-item{
+    color:var(--text-secondary);
+    border-left:2px solid transparent;
+    border-radius:0;
+    text-align:left;
+    padding:.35rem .5rem;
+}
+
+.category-list-item:hover{
+    color:var(--text-primary);
+    background:var(--bg-surface-hover);
+}
+
+.category-list-item--active{
+    color:var(--text-primary);
+    border-left-color:var(--purple);
+    background:var(--bg-surface-hover);
+    font-weight:600;
+}
+
+.filter-chip--active{
+
+    background:var(--bs-success);
+
+    color:#121118;
+
+    border-color:var(--bs-success);
+
+    font-weight:600;
+
+}
+
+.product-card-hover{
+    transition:transform .18s ease, border-color .18s ease;
+}
+
+.product-card-hover:hover{
+    transform:translateY(-4px);
+    border-color:var(--purple);
+}
+
+/* Segunda foto del producto, aparece con crossfade al pasar el mouse */
+.img-fade{
+    transition:opacity .25s ease;
+}
+
+.img-fade-secondary{
+    opacity:0;
+}
+
+.img-fade-secondary.img-fade-visible{
+    opacity:1;
+}
+
+.badge-corner{
+    position:absolute;
+    top:10px;
+    right:10px;
+    z-index:2;
+}
+
+/* Punto de estado dentro de un badge (en-stock / pocas unidades) */
+.status-dot{
+    display:inline-block;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:currentColor;
+    margin-right:5px;
+}
+
+/* ===========================
+   Marca / Hero
+=========================== */
+
+.btn-gradient{
+    background:var(--gradient-brand);
+    border:none;
+    color:#fff;
+}
+
+.btn-gradient:hover{
+    filter:brightness(1.08);
+    color:#fff;
+}
+
+.text-gradient{
+    background:var(--gradient-brand);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+}
+
+.hero-viewport{
+    min-height:calc(100dvh - 72px);
+    display:flex;
+    align-items:center;
+    background-image:
+        linear-gradient(to bottom, transparent 60%, var(--bg-page) 100%),
+        linear-gradient(rgba(15,10,23,.88), rgba(15,10,23,.85)),
+        url('/hero-setup.webp');
+    background-size:cover;
+    background-position:center 30%;
+    background-repeat:no-repeat;
+}
+
+.hero-display{
+    font-size:clamp(2.75rem, 7vw, 5.5rem);
+    line-height:.95;
+}
+
+.stat-block .stat-number{
+    font-family:var(--font-display);
+    font-size:clamp(1.5rem, 3vw, 2.25rem);
+    line-height:1;
+}
+
+.category-tile{
+    position:relative;
+    overflow:hidden;
+    isolation:isolate;
+}
+
+.category-tile::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:var(--gradient-brand);
+    opacity:.14;
+    transition:opacity .18s ease;
+    z-index:-1;
+}
+
+.category-tile:hover::before{
+    opacity:.32;
+}
+
+.category-tile-photo{
+    min-height:130px;
+    background-size:cover;
+    background-position:center;
+    transition:transform .18s ease;
+}
+
+.category-tile-photo:hover{
+    transform:translateY(-3px);
+}
+
+.hero-collage{
+    position:relative;
+    height:420px;
+}
+
+.hero-collage-img{
+    position:absolute;
+    border-radius:var(--radius-card);
+    object-fit:cover;
+    border:1px solid var(--border-subtle);
+    box-shadow:0 20px 40px -12px rgba(0,0,0,.6);
+}
+
+.hero-collage-img--1{
+    width:280px;
+    height:280px;
+    top:0;
+    right:20px;
+    transform:rotate(3deg);
+    z-index:1;
+}
+
+.hero-collage-img--2{
+    width:200px;
+    height:200px;
+    bottom:10px;
+    left:0;
+    transform:rotate(-6deg);
+    z-index:2;
+}
+
+.hero-collage-img--3{
+    width:170px;
+    height:170px;
+    bottom:60px;
+    right:0;
+    transform:rotate(8deg);
+    z-index:3;
+}
+
+/* ===========================
+   Carrito
+=========================== */
+
+.cart-badge{
+    position:absolute;
+    top:-6px;
+    right:-8px;
+    min-width:18px;
+    height:18px;
+    padding:0 4px;
+    border-radius:9px;
+    background:var(--pink);
+    color:#fff;
+    font-size:11px;
+    line-height:18px;
+    text-align:center;
+    font-weight:600;
+}
+
+.qty-stepper{
+    display:inline-flex;
+    align-items:center;
+    gap:.5rem;
+}
+
+.qty-stepper button{
+    width:32px;
+    height:32px;
+    padding:0;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* ===========================
+   Pedidos (estilo Amazon: barra de
+   encabezado + filas de producto)
+=========================== */
+
+.order-card{
+    border:1px solid var(--border-subtle);
+    border-radius:var(--radius-card);
+    overflow:hidden;
+    background:var(--bg-surface);
+}
+
+.order-card.border-success{
+    border-color:var(--bs-success)!important;
+    border-width:2px;
+}
+
+.order-header-bar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:1.25rem;
+    padding:.9rem 1.25rem;
+    background:var(--bg-surface-hover);
+    border-bottom:1px solid var(--border-subtle);
+}
+
+.order-header-seg{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.order-header-label{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    color:var(--text-muted);
+}
+
+.order-header-value{
+    font-size:14px;
+    color:var(--text-primary);
+}
+
+.order-header-link{
+    background:none;
+    border:none;
+    padding:0;
+    color:var(--purple-soft);
+    font-size:13px;
+    text-align:left;
+    cursor:pointer;
+}
+
+.order-header-link:hover{
+    color:var(--purple);
+    text-decoration:underline;
+}
+
+.order-body{
+    padding:1.25rem;
+}
+
+.order-item-row{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    padding:.75rem 0;
+}
+
+.order-item-row.border-bottom{
+    border-color:var(--border-subtle)!important;
+}
+
+/* Tracker de envio estilo "Track package" de Amazon */
+.ship-tracker-headline{
+    font-size:1.1rem;
+    font-weight:700;
+    text-align:center;
+    margin-bottom:1rem;
+}
+
+.ship-tracker-row{
+    display:flex;
+    align-items:center;
+    padding:0 6px;
+}
+
+.ship-tracker-dot{
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:var(--bg-page);
+    border:2px solid var(--border-subtle);
+    flex-shrink:0;
+}
+
+.ship-tracker-dot--done{
+    background:var(--gradient-brand);
+    border-color:transparent;
+}
+
+.ship-tracker-line{
+    flex:1;
+    height:2px;
+    background:var(--border-subtle);
+}
+
+.ship-tracker-line--done{
+    background:var(--gradient-brand);
+}
+
+.ship-tracker-labels{
+    display:flex;
+    margin-top:6px;
+}
+
+.ship-tracker-col{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+.ship-tracker-col:first-child{
+    align-items:flex-start;
+}
+
+.ship-tracker-col:last-child{
+    align-items:flex-end;
+}
+
+.ship-tracker-col:not(:first-child):not(:last-child){
+    align-items:center;
+}
+
+.ship-tracker-label{
+    font-size:11px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    color:var(--text-muted);
+}
+
+.ship-tracker-label--done{
+    color:var(--text-primary);
+}
+
+.ship-tracker-date{
+    font-size:11px;
+    color:var(--text-muted);
+}
+
+/* Banner de incidente (reembolso/reemplazo) */
+.resolution-banner{
+    display:flex;
+    align-items:flex-start;
+    gap:.6rem;
+    padding:.75rem 1rem;
+    border-radius:var(--radius-control);
+    border:1px solid;
+}
+
+.resolution-banner--reembolso{
+    background:rgba(245,166,35,.1);
+    border-color:var(--bs-warning);
+    color:var(--bs-warning);
+}
+
+.resolution-banner--reemplazo{
+    background:rgba(139,92,246,.1);
+    border-color:var(--purple);
+    color:var(--purple-soft);
+}
+
+/* ===========================
+   Perfil
+=========================== */
+
+.profile-cover{
+    border:1px solid var(--border-subtle);
+    border-radius:var(--radius-card);
+    overflow:hidden;
+    background:var(--bg-surface);
+}
+
+.profile-cover-banner{
+    height:88px;
+    background-image:var(--gradient-brand), var(--grid-pattern);
+    background-size:auto, 22px 22px, 22px 22px;
+}
+
+.profile-cover-body{
+    display:flex;
+    align-items:flex-end;
+    gap:1rem;
+    flex-wrap:wrap;
+    padding:0 1.5rem 1.25rem;
+}
+
+.profile-avatar{
+    width:88px;
+    height:88px;
+    margin-top:-44px;
+    border-radius:50%;
+    background:var(--gradient-brand);
+    border:4px solid var(--bg-surface);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:var(--font-display);
+    font-size:1.75rem;
+    color:#fff;
+    flex-shrink:0;
+}
+
+.profile-stat-card{
+    display:flex;
+    align-items:center;
+    gap:.75rem;
+    background:var(--bg-surface);
+    border:1px solid var(--border-subtle);
+    border-radius:var(--radius-card);
+    padding:.85rem 1rem;
+    height:100%;
+}
+
+.profile-stat-icon{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:var(--gradient-brand);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:1.1rem;
+    flex-shrink:0;
+}
+
+.profile-stat-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.4px;
+    color:var(--text-muted);
+}
+
+.profile-stat-value{
+    font-weight:600;
+    font-size:.95rem;
+}
+
+/* ===========================
+   Badges
+=========================== */
+
+.badge.bg-success{
+
+    color:#121118!important;
+
+}
+
+.badge.bg-warning{
+
+    color:#121118!important;
+
+}
+
+.badge.bg-danger{
+
+    color:white!important;
+
+}
+
+/* ===========================
+   Utilities
+=========================== */
+
+.font-display{
+
+    font-family:var(--font-display);
+
+}
+
+.font-mono{
+
+    font-family:var(--font-mono);
+
+}
+
+.text-secondary{
+
+    color:var(--text-secondary)!important;
+
+}
+
+.text-muted{
+
+    color:var(--text-muted)!important;
+
+}
+
+.eyebrow{
+
+    color:var(--purple-soft);
+
+    font-size:11px;
+
+    text-transform:uppercase;
+
+    letter-spacing:1px;
+
+}
+
+.text-purple-soft{
+    color:var(--purple-soft)!important;
+}
+
+/* ===========================
+   Detalle de producto: miniaturas
+=========================== */
+
+.thumb-btn{
+    width:72px;
+    height:72px;
+    flex-shrink:0;
+    padding:0;
+    border-radius:var(--radius-control);
+    border:2px solid var(--border-subtle);
+    overflow:hidden;
+    background:var(--bg-surface);
+    opacity:.7;
+    transition:opacity .15s ease, border-color .15s ease;
+}
+
+.thumb-btn:hover{
+    opacity:1;
+}
+
+.thumb-btn--active{
+    border-color:var(--purple);
+    opacity:1;
+}
+
+.max-w-auth{ max-width:var(--max-w-auth); }
+.max-w-form{ max-width:var(--max-w-form); }
+.max-w-narrow{ max-width:var(--max-w-narrow); }
+.max-w-wide{ max-width:var(--max-w-wide); }
+
+/* ===========================
+   Feedback (alertas de marca)
+   Bootstrap ya trae .alert-success/.alert-danger, pero sus tonos "subtle"
+   se calculan en build-time desde los colores default de Bootstrap, no
+   desde nuestras variables de marca -- por eso definimos las propias.
+=========================== */
+
+.alert-brand-success{
+    background:var(--success-bg);
+    border:1px solid var(--bs-success);
+    color:var(--bs-success);
+}
+
+.alert-brand-warning{
+    background:var(--warning-bg);
+    border:1px solid var(--bs-warning);
+    color:var(--bs-warning);
+}
+
+.alert-brand-danger{
+    background:var(--danger-bg);
+    border:1px solid var(--bs-danger);
+    color:var(--bs-danger);
+}
+
+/* ===========================
+   Accesibilidad: foco visible por teclado
+=========================== */
+
+a:focus-visible,
+button:focus-visible,
+.product-card-hover:focus-visible,
+.category-tile:focus-visible,
+.category-list-item:focus-visible{
+    outline:2px solid var(--purple);
+    outline-offset:2px;
+}
+
+/* ===========================
+   Navbar (dos filas estilo Amazon: barra superior con
+   buscador grande + fila secundaria de navegacion)
+=========================== */
+
+.site-header{
+    position:sticky;
+    top:0;
+    z-index:1030;
+}
+
+.navbar-top{
+    background:var(--bg-page);
+    border-bottom:1px solid var(--border-subtle);
+}
+
+.navbar-top .navbar-brand{
+    font-size:1.5rem;
+}
+
+.search-bar-lg .form-control{
+    border-right:none;
+}
+
+.search-bar-lg .btn-gradient{
+    padding-left:1.1rem;
+    padding-right:1.1rem;
+}
+
+.navbar-account{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    line-height:1.15;
+    padding:.25rem .5rem;
+    border-radius:var(--radius-control);
+    color:var(--text-primary);
+    background:none;
+    border:none;
+}
+
+.navbar-account:hover{
+    background:var(--bg-surface-hover);
+    color:var(--text-primary);
+}
+
+.navbar-account-label i{
+    transition:transform .2s ease;
+}
+
+.navbar-account[aria-expanded="true"] .navbar-account-label i{
+    transform:rotate(180deg);
+}
+
+.navbar-account-greeting{
+    font-size:11px;
+    color:var(--text-muted);
+}
+
+.navbar-account-label{
+    font-size:13px;
+    font-weight:600;
+}
+
+.navbar-account-label i{
+    font-size:10px;
+    vertical-align:middle;
+}
+
+.navbar-cart{
+    display:flex;
+    align-items:center;
+    gap:.4rem;
+    color:var(--text-primary);
+    font-size:1.5rem;
+    padding:.25rem .25rem;
+}
+
+.navbar-cart-label{
+    font-size:13px;
+    font-weight:600;
+}
+
+.navbar-secondary{
+    background:var(--bg-surface);
+    border-bottom:1px solid var(--border-subtle);
+}
+
+.navbar-secondary .nav-link{
+    font-size:14px;
+    padding-top:.5rem!important;
+    padding-bottom:.5rem!important;
+    padding-left:.9rem!important;
+    padding-right:.9rem!important;
+}
+
+/* ===========================
+   Login (pantalla dividida: marca + formulario)
+=========================== */
+
+.login-split{
+    min-height:100dvh;
+    display:flex;
+}
+
+.login-brand-panel{
+    flex:0 0 42%;
+    max-width:560px;
+    padding:3rem;
+    background-image:var(--gradient-brand), var(--grid-pattern);
+    background-size:auto, 42px 42px, 42px 42px;
+}
+
+.login-feature-icon{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:rgba(255,255,255,.15);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    flex-shrink:0;
+}
+
+.login-form-panel{
+    flex:1;
+    padding:2rem;
+}
+
+/* ===========================
+   Modal de confirmacion (reemplaza confirm() nativo)
+=========================== */
+
+.modal-backdrop-custom{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.6);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:1050;
+    padding:1rem;
+}
+
+/* ===========================
+   Panel de filtros colapsable (catalogo, mobile)
+=========================== */
+
+.filters-toggle-icon{
+    transition:transform .2s ease;
+}
+
+/* aria-expanded se mantiene sincronizado por Bootstrap con el estado real
+   del panel; la clase ".collapsed" no sirve aca porque Angular inserta este
+   boton despues de la carga inicial y Bootstrap no la agrega hasta el
+   primer toggle. */
+[data-bs-toggle="collapse"][aria-expanded="true"] .filters-toggle-icon{
+    transform:rotate(180deg);
+}
+
+/* ===========================
+   Tablas admin (ej. historial de inventario)
+=========================== */
+
+.table-admin thead th{
+    background:var(--bg-surface-hover);
+    font-size:10px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    color:var(--text-muted);
+    border-bottom:1px solid var(--border-subtle);
+}
+
+.table-admin tbody tr:hover{
+    background:var(--bg-surface-hover);
+}
+
+/* ===========================
+   Scrollbar
+=========================== */
+
+::-webkit-scrollbar{
+
+    width:10px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#343040;
+
+    border-radius:20px;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+    background:#4a445b;
+
+}
+
+/* ===========================
+   Responsive
+=========================== */
+
+@media (max-width:991px){
+
+    .navbar-nav{
+
+        gap:.5rem;
+
+    }
+
+    .hero-viewport{
+
+        min-height:auto;
+
+        padding-top:2.5rem;
+
+        padding-bottom:2.5rem;
+
+    }
+
+}
+
+@media (max-width:575px){
+
+    .qty-stepper button{
+
+        width:36px;
+
+        height:36px;
+
+    }
+
+}

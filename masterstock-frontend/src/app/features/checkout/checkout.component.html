@@ -1,0 +1,139 @@
+<app-navbar></app-navbar>
+
+<div class="container container-page py-5">
+  <span class="eyebrow d-block">Paso final</span>
+  <h1 class="font-display mb-4">Confirmar pedido</h1>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="row g-4">
+      <!-- Direccion de envio -->
+      <div class="col-lg-7">
+        <div class="card bg-dark border-secondary p-4 mb-3">
+          <h2 class="h6 mb-3"><i class="bi bi-truck"></i> Direccion de envio</h2>
+
+          <div class="mb-3">
+            <label class="form-label small text-secondary d-block">Pais</label>
+            <span class="badge bg-dark border border-secondary text-light fw-normal py-2 px-3">
+              <i class="bi bi-geo-alt-fill text-secondary me-1"></i> Colombia
+            </span>
+            <div class="form-text">Por ahora solo hacemos envios dentro de Colombia.</div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6 mb-3">
+              <label class="form-label" for="checkout-department">Departamento</label>
+              <select id="checkout-department" class="form-select text-light border-secondary" formControlName="department" [class.is-invalid]="fieldError(form.get('department'))">
+                <option value="" disabled>Selecciona un departamento</option>
+                @for (dep of departments; track dep) {
+                  <option [value]="dep">{{ dep }}</option>
+                }
+              </select>
+              @if (fieldError(form.get('department')); as msg) {
+                <div class="invalid-feedback d-block">{{ msg }}</div>
+              }
+            </div>
+            <div class="col-sm-6 mb-3">
+              <label class="form-label" for="checkout-city">Ciudad</label>
+              <input id="checkout-city" type="text" class="form-control text-light border-secondary" formControlName="city" placeholder="Ej. Medellín" [class.is-invalid]="fieldError(form.get('city'))" />
+              @if (fieldError(form.get('city')); as msg) {
+                <div class="invalid-feedback d-block">{{ msg }}</div>
+              }
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="checkout-address">Direccion</label>
+            <input id="checkout-address" type="text" class="form-control text-light border-secondary" formControlName="address" placeholder="Calle, numero, barrio..." [class.is-invalid]="fieldError(form.get('address'))" />
+            @if (fieldError(form.get('address')); as msg) {
+              <div class="invalid-feedback d-block">{{ msg }}</div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="checkout-phone">Telefono de contacto</label>
+            <div class="input-group">
+              <span class="input-group-text border-secondary text-secondary"><i class="bi bi-telephone"></i></span>
+              <input id="checkout-phone" type="tel" class="form-control text-light border-secondary" formControlName="phone" placeholder="Para coordinar la entrega" [class.is-invalid]="fieldError(form.get('phone'))" />
+            </div>
+            @if (fieldError(form.get('phone')); as msg) {
+              <div class="invalid-feedback d-block">{{ msg }}</div>
+            }
+          </div>
+
+          <div class="mb-0">
+            <label class="form-label" for="checkout-notes">Notas para el domiciliario (opcional)</label>
+            <textarea id="checkout-notes" class="form-control text-light border-secondary" formControlName="notes" rows="2" placeholder="Ej. apartamento 302, torre 2"></textarea>
+          </div>
+        </div>
+
+        @if (errorMsg()) {
+          <div class="alert alert-brand-danger d-flex align-items-center gap-2 py-2 px-3" role="alert">
+            <i class="bi bi-exclamation-circle"></i>
+            <span class="small">{{ errorMsg() }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Resumen -->
+      <div class="col-lg-5">
+        <div class="card bg-dark border-secondary corner-notch-sm p-4">
+          <h2 class="h6 mb-3">Resumen del pedido</h2>
+
+          <div class="d-flex flex-column gap-2 mb-3" style="max-height:260px; overflow-y:auto;">
+            @for (item of cart.items(); track item.product._id) {
+              <div class="d-flex align-items-center gap-2 small">
+                <div class="img-placeholder rounded flex-shrink-0" style="width:40px;height:40px;overflow:hidden;">
+                  @if (item.product.images.length) {
+                    <img [src]="item.product.images[0]" class="w-100 h-100 object-fit-cover" [alt]="item.product.name" />
+                  } @else {
+                    <i class="bi bi-image"></i>
+                  }
+                </div>
+                <span class="text-secondary flex-grow-1">{{ item.quantity }}x {{ item.product.name }}</span>
+                <span class="font-mono">{{ item.product.price * item.quantity | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="border-top border-secondary pt-3">
+            <div class="d-flex justify-content-between small mb-2">
+              <span class="text-secondary">Subtotal</span>
+              <span class="font-mono">{{ cart.total() | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <div class="d-flex justify-content-between small mb-2">
+              <span class="text-secondary">Envio</span>
+              @if (cart.shippingCost() === 0) {
+                <span class="font-mono text-success">Gratis</span>
+              } @else {
+                <span class="font-mono">{{ cart.shippingCost() | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+              }
+            </div>
+
+            @if (cart.shippingCost() > 0) {
+              <p class="text-muted small mb-2">
+                Te faltan {{ freeShippingThreshold - cart.total() | currency:'COP':'symbol-narrow':'1.0-0' }} en tu pedido para envio gratis.
+              </p>
+            }
+
+            <div class="d-flex justify-content-between mb-3 pt-2 border-top border-secondary">
+              <span class="fw-semibold">Total</span>
+              <span class="font-mono fs-5 fw-semibold">{{ cart.grandTotal() | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-gradient w-100" [disabled]="loading()">
+            {{ loading() ? 'Confirmando...' : 'Confirmar pedido' }}
+          </button>
+
+          <a routerLink="/carrito" class="btn btn-outline-light btn-sm w-100 mt-2">Volver al carrito</a>
+
+          <p class="text-muted small mt-3 mb-0">
+            El pago se coordina aparte con el equipo de MasterStock. Un administrador debe aprobar el pedido antes de despacharlo.
+          </p>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<app-footer></app-footer>

@@ -1,0 +1,76 @@
+<app-navbar></app-navbar>
+
+<div class="container container-page py-5">
+  <h1 class="font-display mb-1">Historial de inventario</h1>
+  <p class="text-secondary mb-4">Cada entrada y salida de stock, con quien la registro.</p>
+
+  @if (loading()) {
+    <div class="d-flex flex-column align-items-center justify-content-center gap-3 py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="text-muted mb-0">Cargando historial...</p>
+    </div>
+  } @else if (movements().length === 0) {
+    <div class="card corner-notch p-5 text-center">
+      <i class="bi bi-clock-history fs-1 text-secondary mb-3"></i>
+      <p class="text-muted mb-0">Aun no hay movimientos registrados.</p>
+    </div>
+  } @else {
+    <div class="card corner-notch p-0 overflow-hidden">
+      <div class="table-responsive">
+        <table class="table table-admin align-middle mb-0">
+          <thead>
+            <tr>
+              <th class="ps-3">Producto</th>
+              <th>Tipo</th>
+              <th>Cantidad</th>
+              <th>Razon</th>
+              <th class="pe-3">Registrado por</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of movements(); track m._id) {
+              <tr>
+                <td class="ps-3">{{ m.product.name }} <span class="text-muted font-mono small">({{ m.product.sku }})</span></td>
+                <td>
+                  <span class="badge" [ngClass]="m.type === 'entrada' ? 'bg-success' : 'bg-warning'">
+                    <i class="bi" [ngClass]="m.type === 'entrada' ? 'bi-box-arrow-in-down' : 'bi-box-arrow-up'"></i>
+                    {{ m.type }}
+                  </span>
+                </td>
+                <td class="font-mono">{{ m.quantity }}</td>
+                <td class="text-secondary">{{ m.reason }}</td>
+                <td class="text-muted pe-3">{{ m.user.firstName }} {{ m.user.lastName }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <span class="text-muted small">Pagina {{ page() }} de {{ totalPages() }}</span>
+      <div class="d-flex gap-2">
+        <button
+          type="button"
+          class="btn btn-outline-light btn-sm"
+          [disabled]="page() <= 1"
+          (click)="prevPage()"
+        >
+          <i class="bi bi-chevron-left"></i> Anterior
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline-light btn-sm"
+          [disabled]="page() >= totalPages()"
+          (click)="nextPage()"
+        >
+          Siguiente <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+<app-footer></app-footer>
