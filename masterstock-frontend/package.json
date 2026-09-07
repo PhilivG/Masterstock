@@ -41,7 +41,8 @@
     "onlyBuiltDependencies": [
       "esbuild",
       "lmdb",
-      "msgpackr-extract"
+      "msgpackr-extract",
+      "nice-napi"
     ]
   }
 }

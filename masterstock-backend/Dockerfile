@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Instalamos dependencias primero (aprovecha la cache de Docker si el package.json no cambia)
 COPY package.json pnpm-lock.yaml ./
-RUN corepack enable && pnpm install --prod --frozen-lockfile
+RUN corepack enable && corepack prepare pnpm@9 --activate && pnpm install --prod --frozen-lockfile
 
 # Copiamos el resto del codigo
 COPY . .
